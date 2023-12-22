@@ -1,0 +1,3 @@
+C:/Users/laure/Documents/Dev/LearningCpp/SchiffeVersenken(Projekt)/cmake-build-debug/CMakeFiles/SchiffeVersenken_Projekt_.dir
+C:/Users/laure/Documents/Dev/LearningCpp/SchiffeVersenken(Projekt)/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/laure/Documents/Dev/LearningCpp/SchiffeVersenken(Projekt)/cmake-build-debug/CMakeFiles/rebuild_cache.dir
