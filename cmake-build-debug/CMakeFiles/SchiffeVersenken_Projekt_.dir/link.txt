@@ -1,0 +1,3 @@
+"C:\Program Files\IntelliJ\CLion\CLion 2023.2.2\bin\cmake\win\x64\bin\cmake.exe" -E rm -f CMakeFiles\SchiffeVersenken_Projekt_.dir/objects.a
+C:\PROGRA~1\IntelliJ\CLion\CLION2~1.2\bin\mingw\bin\ar.exe qc CMakeFiles\SchiffeVersenken_Projekt_.dir/objects.a @CMakeFiles\SchiffeVersenken_Projekt_.dir\objects1.rsp
+C:\PROGRA~1\IntelliJ\CLion\CLION2~1.2\bin\mingw\bin\G__~1.EXE -g -Wl,--whole-archive CMakeFiles\SchiffeVersenken_Projekt_.dir/objects.a -Wl,--no-whole-archive -o SchiffeVersenken_Projekt_.exe -Wl,--out-implib,libSchiffeVersenken_Projekt_.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\SchiffeVersenken_Projekt_.dir\linkLibs.rsp
