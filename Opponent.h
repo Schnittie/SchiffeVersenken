@@ -6,9 +6,25 @@
 #define SCHIFFEVERSENKEN_PROJEKT__OPPONENT_H
 
 
+#include <memory>
+#include "Board.h"
+
 class Opponent {
+public:
+    // "Schwierigkeits-Score" (0-10)
+    // -> legt fest mit welcher Wahrscheinlichkeit die Entscheidungen des computergesteuerten Gegners taktisch gefällt werden
+    int smartness = 8;
+
+    // fügt ein neues Schiff in das Board ein und gibt es zurück
+    std::unique_ptr<Board> getShipPosition(std::unique_ptr<Board>, int);
+
 //TODO: Was ist ein Opponent?
+// Meine Überlegung (Fleischi): Opponent = das was ein möglicher realer Gegenspieler tun würde
+// -> ist "dumm" und bekommt bei jeder Methode das Board mit rein
+// -> Basically braucht man nur 2 Methoden, eine die ein Schiff platziert und eine die einen "Schuss" abgibt
 //TODO: Idee wir könnten wenn wir fancy sein wollen auch mehrere Opponents machen mit verschiedenen schwierigkeitsgraden welche dann alle ein Interface erfüllen
+// Meine Überlegung (Fleischi): deutlich einfacher einen Score zu machen, der dann in platzieren Methoden einbezogen wird, als mehrere Klassen
+
 };
 
 

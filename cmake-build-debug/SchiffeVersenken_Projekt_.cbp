@@ -93,6 +93,9 @@
 		<Unit filename="C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/Board.h">
 			<Option target="SchiffeVersenken_Projekt_"/>
 		</Unit>
+		<Unit filename="C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/CppRandom.hpp">
+			<Option target="SchiffeVersenken_Projekt_"/>
+		</Unit>
 		<Unit filename="C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/GameLoop.cpp">
 			<Option target="SchiffeVersenken_Projekt_"/>
 		</Unit>
