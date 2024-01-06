@@ -15,8 +15,10 @@ public:
     // → legt fest mit welcher Wahrscheinlichkeit die Entscheidungen des computergesteuerten Gegners taktisch gefällt werden
     int smartness = 8;
 
-    // fügt ein neues Schiff in das Board ein und gibt es zurück
-    std::unique_ptr<Board> getShipPosition(std::unique_ptr<Board>, int);
+    // fügt ein neues Schiff in das Board ein und gibt das Board zurück
+    std::unique_ptr<Board> addRandomShipOfGivenSize(std::unique_ptr<Board>, int);
+    std::unique_ptr<Board> makeGuess(std::unique_ptr<Board>);
+    std::unique_ptr<Board> guessRandom(std::unique_ptr<Board>);
 
 //TODO: Was ist ein Opponent?
 // Meine Überlegung (Fleischi): Opponent = das was ein möglicher realer Gegenspieler tun würde

@@ -71,10 +71,10 @@ bool GameRule::shipDestroyed(int xPos, int yPos, Board board) {
                 resultVector.push_back(shipInThisDirectionDestroyed(xPos+1, yPos, board, Direction::right));
             }
             if (yPos - 1 > 0 && board.shipField[xPos-1][yPos-2]) {
-                resultVector.push_back(shipInThisDirectionDestroyed(xPos, yPos-1, board, Direction::down));
+                resultVector.push_back(shipInThisDirectionDestroyed(xPos, yPos-1, board, Direction::up));
             }
             if (yPos + 1 < 11 && board.shipField[xPos-1][yPos]) {
-                resultVector.push_back(shipInThisDirectionDestroyed(xPos, yPos+1, board, Direction::up));
+                resultVector.push_back(shipInThisDirectionDestroyed(xPos, yPos+1, board, Direction::down));
             }
             return std::all_of(resultVector.begin(), resultVector.end(), [](bool resultPart) {
                 return resultPart;
@@ -106,7 +106,7 @@ bool GameRule::shipInThisDirectionDestroyed(int xPos, int yPos, Board board, Dir
                 } else {
                     return false;
                 }
-            case Direction::down:
+            case Direction::up:
                 if (recentYPos - 1 < 1 || !board.shipField[recentXPos-1][recentYPos-2]) {
                     return true;
                 } else if (board.guessField[recentXPos-1][recentYPos-2] == GuessStatus::guessedRight) {
@@ -114,7 +114,7 @@ bool GameRule::shipInThisDirectionDestroyed(int xPos, int yPos, Board board, Dir
                 } else {
                     return false;
                 }
-            case Direction::up:
+            case Direction::down:
                 if (recentYPos + 1 > 10 || !board.shipField[recentXPos-1][recentYPos]) {
                     return true;
                 } else if (board.guessField[recentXPos-1][recentYPos] == GuessStatus::guessedRight) {

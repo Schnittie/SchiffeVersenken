@@ -60,10 +60,10 @@ GuessStatus Board::makeGuess(int xPos, int yPos) {
                     setShipInThisDirectionSunk(xPos+1, yPos, Direction::right);
                 }
                 if (yPos - 1 > 0 && shipField[xPos-1][yPos-2]) {
-                    setShipInThisDirectionSunk(xPos, yPos-1, Direction::down);
+                    setShipInThisDirectionSunk(xPos, yPos-1, Direction::up);
                 }
                 if (yPos + 1 < 11 && shipField[xPos-1][yPos]) {
-                    setShipInThisDirectionSunk(xPos, yPos+1, Direction::up);
+                    setShipInThisDirectionSunk(xPos, yPos+1, Direction::down);
                 }
                 return GuessStatus::sunkShip;
             } else {
@@ -102,14 +102,14 @@ void Board::setShipInThisDirectionSunk(int xPos, int yPos, Direction direction) 
                 } else {
                     return;
                 }
-            case Direction::down:
+            case Direction::up:
                 if (recentYPos - 1 > 0 && shipField[recentXPos-1][recentYPos-2]) {
                     guessField[recentXPos-1][recentYPos-2] = GuessStatus::sunkShip;
                     recentYPos--;
                 } else {
                     return;
                 }
-            case Direction::up:
+            case Direction::down:
                 if (recentYPos + 1 < 11 && shipField[recentXPos-1][recentYPos]) {
                     guessField[recentXPos-1][recentYPos] = GuessStatus::sunkShip;
                     recentYPos++;
