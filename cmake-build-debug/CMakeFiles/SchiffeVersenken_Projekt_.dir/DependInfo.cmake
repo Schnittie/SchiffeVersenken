@@ -11,6 +11,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/Battleship.cpp" "CMakeFiles/SchiffeVersenken_Projekt_.dir/Battleship.cpp.obj" "gcc" "CMakeFiles/SchiffeVersenken_Projekt_.dir/Battleship.cpp.obj.d"
   "C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/Board.cpp" "CMakeFiles/SchiffeVersenken_Projekt_.dir/Board.cpp.obj" "gcc" "CMakeFiles/SchiffeVersenken_Projekt_.dir/Board.cpp.obj.d"
   "C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/GameLoop.cpp" "CMakeFiles/SchiffeVersenken_Projekt_.dir/GameLoop.cpp.obj" "gcc" "CMakeFiles/SchiffeVersenken_Projekt_.dir/GameLoop.cpp.obj.d"
+  "C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/GameRule.cpp" "CMakeFiles/SchiffeVersenken_Projekt_.dir/GameRule.cpp.obj" "gcc" "CMakeFiles/SchiffeVersenken_Projekt_.dir/GameRule.cpp.obj.d"
   "C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/Opponent.cpp" "CMakeFiles/SchiffeVersenken_Projekt_.dir/Opponent.cpp.obj" "gcc" "CMakeFiles/SchiffeVersenken_Projekt_.dir/Opponent.cpp.obj.d"
   "C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/Persistance.cpp" "CMakeFiles/SchiffeVersenken_Projekt_.dir/Persistance.cpp.obj" "gcc" "CMakeFiles/SchiffeVersenken_Projekt_.dir/Persistance.cpp.obj.d"
   )

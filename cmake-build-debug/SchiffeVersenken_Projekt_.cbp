@@ -102,6 +102,12 @@
 		<Unit filename="C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/GameLoop.h">
 			<Option target="SchiffeVersenken_Projekt_"/>
 		</Unit>
+		<Unit filename="C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/GameRule.cpp">
+			<Option target="SchiffeVersenken_Projekt_"/>
+		</Unit>
+		<Unit filename="C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/GameRule.h">
+			<Option target="SchiffeVersenken_Projekt_"/>
+		</Unit>
 		<Unit filename="C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/Opponent.cpp">
 			<Option target="SchiffeVersenken_Projekt_"/>
 		</Unit>

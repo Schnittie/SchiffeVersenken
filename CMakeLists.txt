@@ -12,4 +12,5 @@ add_executable(SchiffeVersenken_Projekt_ Battleship.cpp
         Persistance.h
         GameLoop.cpp
         GameLoop.h
-        CppRandom.hpp)
+        CppRandom.hpp
+        GameRule.cpp)

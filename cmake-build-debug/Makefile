@@ -200,6 +200,30 @@ GameLoop.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\SchiffeVersenken_Projekt_.dir\build.make CMakeFiles/SchiffeVersenken_Projekt_.dir/GameLoop.cpp.s
 .PHONY : GameLoop.cpp.s
 
+GameRule.obj: GameRule.cpp.obj
+.PHONY : GameRule.obj
+
+# target to build an object file
+GameRule.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SchiffeVersenken_Projekt_.dir\build.make CMakeFiles/SchiffeVersenken_Projekt_.dir/GameRule.cpp.obj
+.PHONY : GameRule.cpp.obj
+
+GameRule.i: GameRule.cpp.i
+.PHONY : GameRule.i
+
+# target to preprocess a source file
+GameRule.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SchiffeVersenken_Projekt_.dir\build.make CMakeFiles/SchiffeVersenken_Projekt_.dir/GameRule.cpp.i
+.PHONY : GameRule.cpp.i
+
+GameRule.s: GameRule.cpp.s
+.PHONY : GameRule.s
+
+# target to generate assembly for a file
+GameRule.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\SchiffeVersenken_Projekt_.dir\build.make CMakeFiles/SchiffeVersenken_Projekt_.dir/GameRule.cpp.s
+.PHONY : GameRule.cpp.s
+
 Opponent.obj: Opponent.cpp.obj
 .PHONY : Opponent.obj
 
@@ -266,6 +290,9 @@ help:
 	@echo ... GameLoop.obj
 	@echo ... GameLoop.i
 	@echo ... GameLoop.s
+	@echo ... GameRule.obj
+	@echo ... GameRule.i
+	@echo ... GameRule.s
 	@echo ... Opponent.obj
 	@echo ... Opponent.i
 	@echo ... Opponent.s

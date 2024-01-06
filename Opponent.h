@@ -11,8 +11,8 @@
 
 class Opponent {
 public:
-    // "Schwierigkeits-Score" (0-10)
-    // -> legt fest mit welcher Wahrscheinlichkeit die Entscheidungen des computergesteuerten Gegners taktisch gefällt werden
+    // "Schwierigkeitsscore" (0-10)
+    // → legt fest mit welcher Wahrscheinlichkeit die Entscheidungen des computergesteuerten Gegners taktisch gefällt werden
     int smartness = 8;
 
     // fügt ein neues Schiff in das Board ein und gibt es zurück

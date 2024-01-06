@@ -7,6 +7,8 @@
 
 
 #include <vector>
+#include <memory>
+#include "GameRule.h"
 
 enum class Direction {
     left,
@@ -17,6 +19,7 @@ enum class Direction {
 
 enum class GuessStatus {
     notGuessed,
+    alreadyGuessed,
     guessedWrong,
     guessedRight,
     sunkShip
@@ -24,6 +27,8 @@ enum class GuessStatus {
 
 
 class Board {
+private:
+    std::unique_ptr<GameRule> rule;
 public:
     bool shipField[10][10]{};
     GuessStatus guessField[10][10]{};

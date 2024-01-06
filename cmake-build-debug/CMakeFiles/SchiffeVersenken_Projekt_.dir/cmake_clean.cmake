@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/SchiffeVersenken_Projekt_.dir/Board.cpp.obj.d"
   "CMakeFiles/SchiffeVersenken_Projekt_.dir/GameLoop.cpp.obj"
   "CMakeFiles/SchiffeVersenken_Projekt_.dir/GameLoop.cpp.obj.d"
+  "CMakeFiles/SchiffeVersenken_Projekt_.dir/GameRule.cpp.obj"
+  "CMakeFiles/SchiffeVersenken_Projekt_.dir/GameRule.cpp.obj.d"
   "CMakeFiles/SchiffeVersenken_Projekt_.dir/Opponent.cpp.obj"
   "CMakeFiles/SchiffeVersenken_Projekt_.dir/Opponent.cpp.obj.d"
   "CMakeFiles/SchiffeVersenken_Projekt_.dir/Persistance.cpp.obj"
