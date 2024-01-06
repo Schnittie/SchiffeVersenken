@@ -11,6 +11,9 @@ class GameRule {
 public:
     // gib true zurück wenn Schiff in Bord platzierbar, sonst false
     bool shipAddCorrect(int, int, int, Direction, Board);
+    bool shipDestroyed(int, int, Board);
+private:
+    bool shipInThisDirectionDestroyed(int, int, Board, Direction);
 };
 
 
