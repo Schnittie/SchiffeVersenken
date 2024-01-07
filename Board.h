@@ -10,6 +10,8 @@
 #include <memory>
 #include "GameRule.h"
 
+class GameRule;
+
 enum class Direction {
     left,
     right,
@@ -30,6 +32,7 @@ class Board {
 private:
     std::unique_ptr<GameRule> rule;
     void setShipInThisDirectionSunk(int, int, Direction);
+    std::unique_ptr<Board> createCopy();
 public:
     bool shipField[10][10]{};
     GuessStatus guessField[10][10]{};
@@ -39,7 +42,10 @@ public:
     //Methode bekommt Größe, Ursprungsposition (x und y) und Ausrichtung von Ursprungsposition aus und gibt bool zurück, ob Platzierung geklappt hat
     bool addShip(int, int, int, Direction);
     GuessStatus makeGuess(int, int);
+    void printGuessField();
+    void printShipField();
 
+    ~Board();
 
 //TODO: was ist ein board?
 //TODO: idee: es gibt drei versionen des Spielbretts, eins auf dem gespeichert ist wo die schiffe sind und eins für jeden Spieler auf dem Treffer und Nieten gespeichert sind

@@ -2,6 +2,7 @@
 // Created by laure on 22.12.2023.
 //
 
+#include <iostream>
 #include "Board.h"
 
 Board::Board() {
@@ -18,7 +19,7 @@ Board::Board() {
 }
 
 bool Board::addShip(int size, int xPos, int yPos, Direction direction) {
-    if (rule->shipAddCorrect(size, xPos, yPos, direction, this)) {
+    if (rule->shipAddCorrect(size, xPos, yPos, direction, createCopy())) {
         // wenn shipAddCorrect true zurückgibt, dann Platzierung des Schiffs erlaubt → Felder setzen
         int fieldsToSet = size;
         int recentXPos = xPos;
@@ -26,15 +27,14 @@ bool Board::addShip(int size, int xPos, int yPos, Direction direction) {
         while (fieldsToSet > 0) {
             shipField[recentXPos - 1][recentYPos - 1] = true;
             // passe Variablen für (je nach Direction) neuem Feld an
-            switch (direction) {
-                case Direction::left:
-                    recentXPos--;
-                case Direction::right:
-                    recentXPos++;
-                case Direction::up:
-                    recentYPos--;
-                case Direction::down:
-                    recentYPos++;
+            if (direction == Direction::left) {
+                recentXPos--;
+            } else if (direction == Direction::right) {
+                recentXPos++;
+            } else if (direction == Direction::up) {
+                recentYPos--;
+            } else{
+                recentYPos++;
             }
             fieldsToSet--;
         }
@@ -49,7 +49,7 @@ GuessStatus Board::makeGuess(int xPos, int yPos) {
     if (xPos < 11 && xPos > 0 && yPos < 11 && yPos > 0 && guessField[xPos-1][yPos-1] == GuessStatus::notGuessed) {
         // an angegebenem Feld befindet sich ein Schiff
         if (shipField[xPos-1][yPos-1]) {
-            if (rule->shipDestroyed(xPos, yPos)) {
+            if (rule->shipDestroyed(xPos, yPos, createCopy())) {
                 // wird das angegebene Feld aufgedeckt, wird dadurch ein Schiff zerstört
                 guessField[xPos-1][yPos-1] = GuessStatus::sunkShip;
                 // setze alle weiteren angrenzenden Schiffsfelder auf Status sunk
@@ -118,4 +118,66 @@ void Board::setShipInThisDirectionSunk(int xPos, int yPos, Direction direction) 
                 }
         }
     }
+}
+
+void Board::printGuessField() {
+    std::cout << std::endl << "     1  2  3  4  5  6  7  8  9  10    " << std::endl;
+    // oberer Rand
+    for (char c = 'A'; c <= 'J'; c++) {
+        std::string output = " ";
+        output +=  c;
+        output += "   ";
+        // seitlicher Rand
+        for (auto & i : guessField) {
+            if (i[c-65] == GuessStatus::sunkShip) {
+                output += "#  ";
+            } else if (i[c-65] == GuessStatus::guessedRight) {
+                output += "x  ";
+            } else if (i[c-65] == GuessStatus::guessedWrong) {
+                output += "   ";
+            } else if (i[c-65] == GuessStatus::notGuessed) {
+                output += "~  ";
+            }
+            // Zeile des Guess Fields (c-65 ist Zahl von 0 bis 9, da ASCII-Wert von A = 65 und J = 74)
+        }
+        std::cout << output << "     " << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+void Board::printShipField() {
+    std::cout << std::endl << "     1  2  3  4  5  6  7  8  9  10    " << std::endl;
+    // oberer Rand
+    for (char c = 'A'; c <= 'J'; c++) {
+        std::string output = " ";
+        output +=  c;
+        output += "   ";
+        // seitlicher Rand
+        for (auto & i : shipField) {
+            if (i[c - 65]) {
+                output += "#  ";
+            } else {
+                output += "~  ";
+            }
+            // Zeile des Ship Fields (c-65 ist Zahl von 0 bis 9, da ASCII-Wert von A = 65 und J = 74)
+        }
+        std::cout << output << "     " << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+std::unique_ptr<Board> Board::createCopy() {
+    // Erstelle einen neuen std::unique_ptr, der auf eine Kopie des aktuellen Objekts zeigt
+    std::unique_ptr<Board> boardCopy = std::make_unique<Board>();
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 10; ++j) {
+            boardCopy->guessField[i][j] = guessField[i][j];
+            boardCopy->shipField[i][j] = shipField[i][j];
+        }
+    }
+    return boardCopy;
+}
+
+Board::~Board() {
+    rule = nullptr;
 }

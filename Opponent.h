@@ -17,6 +17,7 @@ public:
 
     // fügt ein neues Schiff in das Board ein und gibt das Board zurück
     std::unique_ptr<Board> addRandomShipOfGivenSize(std::unique_ptr<Board>, int);
+    std::unique_ptr<Board> placeAllShips(std::unique_ptr<Board>);
     std::unique_ptr<Board> makeGuess(std::unique_ptr<Board>);
     std::unique_ptr<Board> guessRandom(std::unique_ptr<Board>);
 

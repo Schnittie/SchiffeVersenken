@@ -5,15 +5,19 @@
 #ifndef SCHIFFEVERSENKEN_PROJEKT__GAMERULE_H
 #define SCHIFFEVERSENKEN_PROJEKT__GAMERULE_H
 
-#include "Board.h."
+#include "Board.h"
+
+class Board;
+
+enum class Direction;
 
 class GameRule {
 public:
     // gib true zurück wenn Schiff in Bord platzierbar, sonst false
-    bool shipAddCorrect(int, int, int, Direction, Board);
-    bool shipDestroyed(int, int, Board);
+    bool shipAddCorrect(int, int, int, Direction, std::unique_ptr<Board>);
+    bool shipDestroyed(int, int, std::unique_ptr<Board>);
 private:
-    bool shipInThisDirectionDestroyed(int, int, Board, Direction);
+    bool shipInThisDirectionDestroyed(int, int, std::unique_ptr<Board>, Direction);
 };
 
 

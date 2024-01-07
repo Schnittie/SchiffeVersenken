@@ -15,18 +15,26 @@ std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board>
         xPos = GetRandomNumberBetween(1, 10);
         yPos = GetRandomNumberBetween(1, 10);
         directionSelector = GetRandomNumberBetween(1, 4);
-        switch (directionSelector) {
-            case 1:
-                direction = Direction::up;
-            case 2:
-                direction = Direction::right;
-            case 3:
-                direction = Direction::down;
-            case 4:
-                direction = Direction::left;
+        if (directionSelector == 1) {
+            direction = Direction::up;
+        } else if (directionSelector == 2) {
+            direction = Direction::right;
+        } else if (directionSelector == 3) {
+            direction = Direction::down;
+        } else {
+            direction = Direction::left;
         }
     } while (!board->addShip(shipSize, xPos, yPos, direction));
     return std::move(board);
+}
+
+std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
+    for (int shipSize = 5; shipSize > 1; shipSize--) {
+        for (int shipNumber = 0; shipNumber < 6-shipSize; shipNumber++) {
+            board = addRandomShipOfGivenSize(std::move(board), shipSize);
+        }
+    }
+    return board;
 }
 
 std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) {
@@ -95,3 +103,4 @@ std::unique_ptr<Board> Opponent::guessRandom(std::unique_ptr<Board> board) {
     }
     return std::move(board);
 }
+
