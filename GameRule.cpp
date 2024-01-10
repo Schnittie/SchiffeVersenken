@@ -97,48 +97,95 @@ bool GameRule::shipInThisDirectionDestroyed(int xPos, int yPos, std::unique_ptr<
     int recentXPos = xPos;
     int recentYPos = yPos;
     while (true) {
-        switch (direction) {
-            case Direction::left: //LLC idk ob das in c++ geht, aber in java würde ich dem Direction Enum noch die information hinzufügen, was es bedeutet z.B. links zu sein
-                if (!insideField(recentXPos - 1) || !board->shipField[recentXPos-1][recentYPos]) {
-                    board = nullptr;
-                    return true;
-                } else if (board->guessField[recentXPos-1][recentYPos] == GuessStatus::guessedRight) {
-                    recentXPos--;
-                } else {
-                    board = nullptr;
-                    return false;
-                }
-            case Direction::right:
-                if (!insideField(recentXPos + 1) || !board->shipField[recentXPos+1][recentYPos]) {
-                    board = nullptr;
-                    return true;
-                } else if (board->guessField[recentXPos+1][recentYPos] == GuessStatus::guessedRight) {
-                    recentXPos++;
-                } else {
-                    board = nullptr;
-                    return false;
-                }
-            case Direction::up:
-                if (!insideField(recentYPos - 1) || !board->shipField[recentXPos][recentYPos-1]) {
-                    board = nullptr;
-                    return true;
-                } else if (board->guessField[recentXPos][recentYPos-1] == GuessStatus::guessedRight) {
-                    recentYPos--;
-                } else {
-                    board = nullptr;
-                    return false;
-                }
-            case Direction::down:
-                if (!insideField(recentYPos + 1)|| !board->shipField[recentXPos][recentYPos+1]) {
-                    board = nullptr;
-                    return true;
-                } else if (board->guessField[recentXPos][recentYPos+1] == GuessStatus::guessedRight) {
-                    recentYPos++;
-                } else {
-                    board = nullptr;
-                    return false;
-                }
+        if (direction == Direction::left) {
+            if (!insideField(recentXPos - 1) || !board->shipField[recentXPos-1][recentYPos]) {
+                // Feld 1 weiter links liegt entweder außerhalb oder es befindet sich kein Schiff darauf
+                board = nullptr;
+                return true;
+            } else if (board->guessField[recentXPos-1][recentYPos] == GuessStatus::guessedRight) {
+                // es befindet sich ein Schiff auf dem Feld 1 weiter links (da erster if-Fall nicht eingetroffen und dieses wurde bereits an diesem Feld getroffen
+                recentXPos--;
+            } else {
+                // es befindet sich ein Schiff auf dem Feld 1 weiter links und es wurde z.B. noch nicht beschossen
+                board = nullptr;
+                return false;
+            }
+        } else if (direction == Direction::right) {
+            if (!insideField(recentXPos + 1) || !board->shipField[recentXPos+1][recentYPos]) {
+                board = nullptr;
+                return true;
+            } else if (board->guessField[recentXPos+1][recentYPos] == GuessStatus::guessedRight) {
+                recentXPos++;
+            } else {
+                board = nullptr;
+                return false;
+            }
+        } else if (direction == Direction::up) {
+            if (!insideField(recentYPos - 1) || !board->shipField[recentXPos][recentYPos-1]) {
+                board = nullptr;
+                return true;
+            } else if (board->guessField[recentXPos][recentYPos-1] == GuessStatus::guessedRight) {
+                recentYPos--;
+            } else {
+                board = nullptr;
+                return false;
+            }
+        } else{
+            if (!insideField(recentYPos + 1)|| !board->shipField[recentXPos][recentYPos+1]) {
+                board = nullptr;
+                return true;
+            } else if (board->guessField[recentXPos][recentYPos+1] == GuessStatus::guessedRight) {
+                recentYPos++;
+            } else {
+                board = nullptr;
+                return false;
+            }
         }
+//        switch (direction) {
+//            case Direction::left: //LLC idk ob das in c++ geht, aber in java würde ich dem Direction Enum noch die information hinzufügen, was es bedeutet z.B. links zu sein
+//                if (!insideField(recentXPos - 1) || !board->shipField[recentXPos-1][recentYPos]) {
+//                    // Feld 1 weiter links liegt entweder außerhalb oder es befindet sich kein Schiff darauf
+//                    board = nullptr;
+//                    return true;
+//                } else if (board->guessField[recentXPos-1][recentYPos] == GuessStatus::guessedRight) {
+//                    // es befindet sich ein Schiff auf dem Feld 1 weiter links (da erster if-Fall nicht eingetroffen und dieses wurde bereits an diesem Feld getroffen
+//                    recentXPos--;
+//                } else {
+//                    // es befindet sich ein Schiff auf dem Feld 1 weiter links und es wurde z.B. noch nicht beschossen
+//                    board = nullptr;
+//                    return false;
+//                }
+//            case Direction::right:
+//                if (!insideField(recentXPos + 1) || !board->shipField[recentXPos+1][recentYPos]) {
+//                    board = nullptr;
+//                    return true;
+//                } else if (board->guessField[recentXPos+1][recentYPos] == GuessStatus::guessedRight) {
+//                    recentXPos++;
+//                } else {
+//                    board = nullptr;
+//                    return false;
+//                }
+//            case Direction::up:
+//                if (!insideField(recentYPos - 1) || !board->shipField[recentXPos][recentYPos-1]) {
+//                    board = nullptr;
+//                    return true;
+//                } else if (board->guessField[recentXPos][recentYPos-1] == GuessStatus::guessedRight) {
+//                    recentYPos--;
+//                } else {
+//                    board = nullptr;
+//                    return false;
+//                }
+//            case Direction::down:
+//                if (!insideField(recentYPos + 1)|| !board->shipField[recentXPos][recentYPos+1]) {
+//                    board = nullptr;
+//                    return true;
+//                } else if (board->guessField[recentXPos][recentYPos+1] == GuessStatus::guessedRight) {
+//                    recentYPos++;
+//                } else {
+//                    board = nullptr;
+//                    return false;
+//                }
+//        }
     }
 }
 
