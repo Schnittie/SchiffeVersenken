@@ -9,17 +9,17 @@
 
 bool GameRule::shipAddCorrect(int size, int xPos, int yPos, Direction direction, std::unique_ptr<Board> board) {
     // teste, ob Ursprungspunkt des Schiffs auf dem Feld
-    if (size < 6 && size > 0 && xPos < 11 && xPos > 0 && yPos < 11 && yPos > 0) {
+    if (size < 6 && size > 0 && xPos < 11 && xPos > 0 && yPos < 11 && yPos > 0) { //LLC variable Boardsize? dann wäre es nicht 11 sondern borad.size +1
         // testen, ob weitere Schiffsfelder innerhalb von Board und nicht neben anderem Schiffsfeld
-        int fieldsToSet = size;
-        int recentXPos = xPos;
+        int fieldsToSet = size;//LLC size ist größe des zu setztenden botes
+        int recentXPos = xPos; //LLC recent = aktuell?
         int recentYPos = yPos;
         while (fieldsToSet > 0) {
             // teste, ob aktuell zu behandelndes Feld unbelegt ist
-            if (recentXPos > 0 && recentYPos > 0 && recentXPos < 11 && recentYPos < 11 &&
-                !board->shipField[recentXPos - 1][recentYPos - 1]) {
+            if (recentXPos > 0 && recentYPos > 0 && recentXPos < 11 && recentYPos < 11 && //LLC das koordinatensystem geht von 1 bis 10?
+                !board->shipField[recentXPos - 1][recentYPos - 1]) {//LLC das schiff koordinatensystem geht von 0 bis 9?
                 // teste, ob Feld links davon unbelegt ist oder außerhalb des Feldes liegt
-                bool leftFieldFree = recentXPos == 1 || !board->shipField[recentXPos - 2][recentYPos - 1];
+                bool leftFieldFree = recentXPos == 1 || !board->shipField[recentXPos - 2][recentYPos - 1]; //LLC ist 1 jezt im feld oder außerhalb
                 // teste, ob Feld rechts davon unbelegt ist oder außerhalb des Feldes liegt
                 bool rightFieldFree = recentXPos == 10 || !board->shipField[recentXPos][recentYPos - 1];
                 // teste, ob Feld darüber unbelegt ist oder außerhalb des Feldes liegt
@@ -27,7 +27,7 @@ bool GameRule::shipAddCorrect(int size, int xPos, int yPos, Direction direction,
                 // teste, ob Feld darunter unbelegt ist oder außerhalb des Feldes liegt
                 bool lowerFieldFree = recentYPos == 10 || !board->shipField[recentXPos - 1][recentYPos];
 
-                if (leftFieldFree && rightFieldFree && upperFieldFree && lowerFieldFree) {
+                if (leftFieldFree && rightFieldFree && upperFieldFree && lowerFieldFree) {//LLC also ich schaue auf alle umliegenden felder, die if condition wird erfüllt, wenn alle Nachbarn entweder außerhalb des felds oder unbelegt sind
                     // passe Variablen für (je nach Direction) neuem Feld an
                     if (direction == Direction::left) {
                         recentXPos--;
@@ -38,9 +38,9 @@ bool GameRule::shipAddCorrect(int size, int xPos, int yPos, Direction direction,
                     } else {
                         recentYPos++;
                     }
-                    fieldsToSet--;
+                    fieldsToSet--; //LLC mein switch herz weint
                 } else {
-                    board = nullptr;
+                    board = nullptr; //LLC schiffe dürfen nicht nebeneinander gesetzt werden?
                     return false;
                 }
             } else {
@@ -48,7 +48,7 @@ bool GameRule::shipAddCorrect(int size, int xPos, int yPos, Direction direction,
                 return false;
             }
         }
-        board = nullptr;
+        board = nullptr;//LLC board = nullptr verstehe ich nicht board ist doch nur innerhalb der methode existent?
         return true;
     } else {
         board = nullptr;
@@ -57,8 +57,8 @@ bool GameRule::shipAddCorrect(int size, int xPos, int yPos, Direction direction,
 }
 
 bool GameRule::shipDestroyed(int xPos, int yPos, std::unique_ptr<Board> board) {
-    if (xPos < 11 && xPos > 0 && yPos < 11 && yPos > 0 && board->shipField[xPos-1][yPos-1]) {
-        // teste, ob alle Felder um Ausgangsfeld entweder außerhalb Board oder ohne Schiffsfeld sind
+    if (xPos < 11 && xPos > 0 && yPos < 11 && yPos > 0 && board->shipField[xPos-1][yPos-1]) {//LLC cool wäre doch eine methode die checkt ob eine coordinate im feld ist, würde den code glaube ich leserlicher machen
+        // teste, ob alle Felder um Ausgangsfeld entweder außerhalb Board oder ohne Schiffsfeld sind //LLC why
         if ((xPos - 1 < 1 || !board->shipField[xPos-2][yPos-1])
         && (xPos + 1 > 10 || !board->shipField[xPos][yPos-1])
         && (yPos - 1 < 1 || !board->shipField[xPos-1][yPos-2])
@@ -81,13 +81,14 @@ bool GameRule::shipDestroyed(int xPos, int yPos, std::unique_ptr<Board> board) {
                 resultVector.push_back(shipInThisDirectionDestroyed(xPos, yPos+1, std::move(board), Direction::down));
             }
             return std::all_of(resultVector.begin(), resultVector.end(), [](bool resultPart) {
-                return resultPart;
+                return resultPart; //LLC es wird gechecked ob alle true sind?
             });
         }
     } else {
         board = nullptr;
         return false;
-    }
+    }//LLC wegen dieser mehtode dürfen schiffe nicht direkt nebeneinander sein?
+    //LLC ich glaube es wäre besser wenn schiffe eigene objekte wären, muss darüber aber noch nachdenken wenn ich den restlichen code durchgelesen habe
 }
 
 bool GameRule::shipInThisDirectionDestroyed(int xPos, int yPos, std::unique_ptr<Board> board, Direction direction) {
@@ -95,7 +96,7 @@ bool GameRule::shipInThisDirectionDestroyed(int xPos, int yPos, std::unique_ptr<
     int recentYPos = yPos;
     while (true) {
         switch (direction) {
-            case Direction::left:
+            case Direction::left: //LLC idk ob das in c++ geht, aber in java würde ich dem Direction Enum noch die information hinzufügen, was es bedeutet z.B. links zu sein
                 if (recentXPos - 1 < 1 || !board->shipField[recentXPos-2][recentYPos-1]) {
                     board = nullptr;
                     return true;
