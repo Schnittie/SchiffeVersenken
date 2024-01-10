@@ -14,7 +14,7 @@ Board::Board() {
         }
     }
     // richte unique_ptr auf GameRule ein
-    auto* gameRule = new GameRule;
+    auto* gameRule = new GameRule; //LLC was ist eine instanz von Gamerule, hatten wir sowas wie static methoden / brauchen wir um methoden hinzuzufügen überhaupt eine klasse
     rule = std::unique_ptr<GameRule>(gameRule);
 }
 
@@ -34,7 +34,7 @@ bool Board::addShip(int size, int xPos, int yPos, Direction direction) {
             } else if (direction == Direction::up) {
                 recentYPos--;
             } else{
-                recentYPos++;
+                recentYPos++;//LLC mein Switch herz leidet
             }
             fieldsToSet--;
         }
@@ -65,7 +65,7 @@ GuessStatus Board::makeGuess(int xPos, int yPos) {
                 if (yPos + 1 < 11 && shipField[xPos-1][yPos]) {
                     setShipInThisDirectionSunk(xPos, yPos+1, Direction::down);
                 }
-                return GuessStatus::sunkShip;
+                return GuessStatus::sunkShip; //LLC das müsste auch geändert werden für angrenzenden Schiffe
             } else {
                 // wird das angegebene Feld aufgedeckt, wird dadurch kein Schiff zerstört
                 guessField[xPos-1][yPos-1] = GuessStatus::guessedRight;
@@ -88,7 +88,7 @@ void Board::setShipInThisDirectionSunk(int xPos, int yPos, Direction direction) 
     int recentYPos = yPos;
     while (true) {
         switch (direction) {
-            case Direction::left:
+            case Direction::left: //LLC hier wieder der punkt von Info was es bedeutet links zu sein in das enum
                 if (recentXPos - 1 > 0 && shipField[recentXPos-2][recentYPos-1]) {
                     guessField[recentXPos-2][recentYPos-1] = GuessStatus::sunkShip;
                     recentXPos--;
@@ -138,7 +138,7 @@ void Board::printGuessField() {
             } else if (i[c-65] == GuessStatus::notGuessed) {
                 output += "~  ";
             }
-            // Zeile des Guess Fields (c-65 ist Zahl von 0 bis 9, da ASCII-Wert von A = 65 und J = 74)
+            // Zeile des Guess Fields (c-65 ist Zahl von 0 bis 9, da ASCII-Wert von A = 65 und J = 74) //LLC ich vertraue dir
         }
         std::cout << output << "     " << std::endl;
     }
@@ -168,7 +168,7 @@ void Board::printShipField() {
 
 std::unique_ptr<Board> Board::createCopy() {
     // Erstelle einen neuen std::unique_ptr, der auf eine Kopie des aktuellen Objekts zeigt
-    std::unique_ptr<Board> boardCopy = std::make_unique<Board>();
+    std::unique_ptr<Board> boardCopy = std::make_unique<Board>();//LLC wir arbeiten mit pointern also bist du sicher das das eine kopie ist
     for (int i = 0; i < 10; ++i) {
         for (int j = 0; j < 10; ++j) {
             boardCopy->guessField[i][j] = guessField[i][j];

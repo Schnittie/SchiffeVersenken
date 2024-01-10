@@ -1,3 +1,0 @@
-C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/cmake-build-debug/CMakeFiles/SchiffeVersenken_Projekt_.dir
-C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/eigene Dateien/Duales Studium/C++-Projekt/SchiffeVersenken/cmake-build-debug/CMakeFiles/rebuild_cache.dir
