@@ -68,17 +68,17 @@ bool GameRule::shipDestroyed(int xPos, int yPos, std::unique_ptr<Board> board) {
         } else {
             // teste mit Untermethode, ob Schiff in alle Richtungen, in die es weiter geht, zerstört ist
             std::vector<bool> resultVector;
-            if (xPos - 1 > 0 && board->shipField[xPos-2][yPos-1]) {
-                resultVector.push_back(shipInThisDirectionDestroyed(xPos-1, yPos, std::move(board), Direction::left));
+            if (xPos > 1 && board->shipField[xPos-2][yPos-1]) {
+                resultVector.push_back(shipInThisDirectionDestroyed(xPos-1, yPos, std::move(board->createCopy()), Direction::left));
             }
             if (xPos + 1 < 11 && board->shipField[xPos][yPos-1]) {
-                resultVector.push_back(shipInThisDirectionDestroyed(xPos+1, yPos, std::move(board), Direction::right));
+                resultVector.push_back(shipInThisDirectionDestroyed(xPos+1, yPos, std::move(board->createCopy()), Direction::right));
             }
             if (yPos - 1 > 0 && board->shipField[xPos-1][yPos-2]) {
-                resultVector.push_back(shipInThisDirectionDestroyed(xPos, yPos-1, std::move(board), Direction::up));
+                resultVector.push_back(shipInThisDirectionDestroyed(xPos, yPos-1, std::move(board->createCopy()), Direction::up));
             }
             if (yPos + 1 < 11 && board->shipField[xPos-1][yPos]) {
-                resultVector.push_back(shipInThisDirectionDestroyed(xPos, yPos+1, std::move(board), Direction::down));
+                resultVector.push_back(shipInThisDirectionDestroyed(xPos, yPos+1, std::move(board->createCopy()), Direction::down));
             }
             return std::all_of(resultVector.begin(), resultVector.end(), [](bool resultPart) {
                 return resultPart;
@@ -94,47 +94,46 @@ bool GameRule::shipInThisDirectionDestroyed(int xPos, int yPos, std::unique_ptr<
     int recentXPos = xPos;
     int recentYPos = yPos;
     while (true) {
-        switch (direction) {
-            case Direction::left:
-                if (recentXPos - 1 < 1 || !board->shipField[recentXPos-2][recentYPos-1]) {
-                    board = nullptr;
-                    return true;
-                } else if (board->guessField[recentXPos-2][recentYPos-1] == GuessStatus::guessedRight) {
-                    recentXPos--;
-                } else {
-                    board = nullptr;
-                    return false;
-                }
-            case Direction::right:
-                if (recentXPos + 1 > 10 || !board->shipField[recentXPos][recentYPos-1]) {
-                    board = nullptr;
-                    return true;
-                } else if (board->guessField[recentXPos][recentYPos-1] == GuessStatus::guessedRight) {
-                    recentXPos++;
-                } else {
-                    board = nullptr;
-                    return false;
-                }
-            case Direction::up:
-                if (recentYPos - 1 < 1 || !board->shipField[recentXPos-1][recentYPos-2]) {
-                    board = nullptr;
-                    return true;
-                } else if (board->guessField[recentXPos-1][recentYPos-2] == GuessStatus::guessedRight) {
-                    recentYPos--;
-                } else {
-                    board = nullptr;
-                    return false;
-                }
-            case Direction::down:
-                if (recentYPos + 1 > 10 || !board->shipField[recentXPos-1][recentYPos]) {
-                    board = nullptr;
-                    return true;
-                } else if (board->guessField[recentXPos-1][recentYPos] == GuessStatus::guessedRight) {
-                    recentYPos++;
-                } else {
-                    board = nullptr;
-                    return false;
-                }
+        if (direction == Direction::left) {
+            if (recentXPos - 1 < 1 || !board->shipField[recentXPos-2][recentYPos-1]) {
+                board = nullptr;
+                return true;
+            } else if (board->guessField[recentXPos-2][recentYPos-1] == GuessStatus::guessedRight) {
+                recentXPos--;
+            } else {
+                board = nullptr;
+                return false;
+            }
+        } else if (direction == Direction::right) {
+            if (recentXPos + 1 > 10 || !board->shipField[recentXPos][recentYPos-1]) {
+                board = nullptr;
+                return true;
+            } else if (board->guessField[recentXPos][recentYPos-1] == GuessStatus::guessedRight) {
+                recentXPos++;
+            } else {
+                board = nullptr;
+                return false;
+            }
+        } else if (direction == Direction::up) {
+            if (recentYPos - 1 < 1 || !board->shipField[recentXPos-1][recentYPos-2]) {
+                board = nullptr;
+                return true;
+            } else if (board->guessField[recentXPos-1][recentYPos-2] == GuessStatus::guessedRight) {
+                recentYPos--;
+            } else {
+                board = nullptr;
+                return false;
+            }
+        } else {
+            if (recentYPos + 1 > 10 || !board->shipField[recentXPos-1][recentYPos]) {
+                board = nullptr;
+                return true;
+            } else if (board->guessField[recentXPos-1][recentYPos] == GuessStatus::guessedRight) {
+                recentYPos++;
+            } else {
+                board = nullptr;
+                return false;
+            }
         }
     }
 }

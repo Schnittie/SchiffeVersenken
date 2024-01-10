@@ -18,6 +18,7 @@ public:
     bool shipDestroyed(int, int, std::unique_ptr<Board>);
 private:
     bool shipInThisDirectionDestroyed(int, int, std::unique_ptr<Board>, Direction);
+    std::unique_ptr<Board> createCopy();
 };
 
 

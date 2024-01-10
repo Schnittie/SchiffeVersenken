@@ -32,8 +32,8 @@ class Board {
 private:
     std::unique_ptr<GameRule> rule;
     void setShipInThisDirectionSunk(int, int, Direction);
-    std::unique_ptr<Board> createCopy();
 public:
+    std::unique_ptr<Board> createCopy();
     bool shipField[10][10]{};
     GuessStatus guessField[10][10]{};
 
@@ -51,6 +51,5 @@ public:
 //TODO: idee: es gibt drei versionen des Spielbretts, eins auf dem gespeichert ist wo die schiffe sind und eins für jeden Spieler auf dem Treffer und Nieten gespeichert sind
 // Meine Überlegung (Fleischi): würde sagen, man braucht 2, jeder seins, in das man seine Schiffe speichert, man "guessed" dann sozusagen auf dem gegnerischen Board
 };
-
 
 #endif //SCHIFFEVERSENKEN_PROJEKT__BOARD_H
