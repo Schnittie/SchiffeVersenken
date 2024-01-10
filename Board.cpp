@@ -18,14 +18,14 @@ Board::Board() {
     rule = std::unique_ptr<GameRule>(gameRule);
 }
 
-bool Board::addShip(int size, int xPos, int yPos, Direction direction) {
+bool Board::addShip(int size, int xPos, int yPos, Direction direction) { // angenommen xPos und yPos sind die Positionen im Array, also 0-9
     if (rule->shipAddCorrect(size, xPos, yPos, direction, createCopy())) {
         // wenn shipAddCorrect true zurückgibt, dann Platzierung des Schiffs erlaubt → Felder setzen
         int fieldsToSet = size;
         int recentXPos = xPos;
         int recentYPos = yPos;
         while (fieldsToSet > 0) {
-            shipField[recentXPos - 1][recentYPos - 1] = true;
+            shipField[recentXPos][recentYPos] = true;
             // passe Variablen für (je nach Direction) neuem Feld an
             if (direction == Direction::left) {
                 recentXPos--;
@@ -46,34 +46,35 @@ bool Board::addShip(int size, int xPos, int yPos, Direction direction) {
 
 GuessStatus Board::makeGuess(int xPos, int yPos) {
     // angegebenes Feld ist innerhalb des Boards und wurde noch nicht guessed
-    if (xPos < 11 && xPos > 0 && yPos < 11 && yPos > 0 && guessField[xPos-1][yPos-1] == GuessStatus::notGuessed) {
+    if (rule->insideField(xPos, yPos) && guessField[xPos][yPos] == GuessStatus::notGuessed) {
         // an angegebenem Feld befindet sich ein Schiff
-        if (shipField[xPos-1][yPos-1]) {
+        if (shipField[xPos][yPos]) {
             if (rule->shipDestroyed(xPos, yPos, createCopy())) {
                 // wird das angegebene Feld aufgedeckt, wird dadurch ein Schiff zerstört
-                guessField[xPos-1][yPos-1] = GuessStatus::sunkShip;
+                guessField[xPos][yPos] = GuessStatus::sunkShip;
                 // setze alle weiteren angrenzenden Schiffsfelder auf Status sunk
-                if (xPos - 1 > 0 && shipField[xPos-2][yPos-1]) {
-                    setShipInThisDirectionSunk(xPos-1, yPos, Direction::left);
+                if (rule->insideField(xPos - 1) && shipField[xPos-1][yPos]) {
+                    setShipInThisDirectionSunk(xPos, yPos, Direction::left);
                 }
-                if (xPos + 1 < 11 && shipField[xPos][yPos-1]) {
-                    setShipInThisDirectionSunk(xPos+1, yPos, Direction::right);
+                if (rule->insideField(xPos + 1) && shipField[xPos+1][yPos]) {
+                    setShipInThisDirectionSunk(xPos, yPos, Direction::right);
                 }
-                if (yPos - 1 > 0 && shipField[xPos-1][yPos-2]) {
-                    setShipInThisDirectionSunk(xPos, yPos-1, Direction::up);
+                if (rule->insideField(yPos - 1) && shipField[xPos][yPos-1]) {
+                    setShipInThisDirectionSunk(xPos, yPos, Direction::up);
                 }
-                if (yPos + 1 < 11 && shipField[xPos-1][yPos]) {
-                    setShipInThisDirectionSunk(xPos, yPos+1, Direction::down);
+                if (rule->insideField(yPos + 1) && shipField[xPos][yPos+1]) {
+                    setShipInThisDirectionSunk(xPos, yPos, Direction::down);
                 }
+                std::cout << std::endl;
                 return GuessStatus::sunkShip; //LLC das müsste auch geändert werden für angrenzenden Schiffe
             } else {
                 // wird das angegebene Feld aufgedeckt, wird dadurch kein Schiff zerstört
-                guessField[xPos-1][yPos-1] = GuessStatus::guessedRight;
+                guessField[xPos][yPos] = GuessStatus::guessedRight;
                 return GuessStatus::guessedRight;
             }
         } else {
             // am angegebenen Feld befindet sich kein Schiff
-            guessField[xPos-1][yPos-1] = GuessStatus::guessedWrong;
+            guessField[xPos][yPos] = GuessStatus::guessedWrong;
             return GuessStatus::guessedWrong;
         }
     } else {
@@ -87,36 +88,65 @@ void Board::setShipInThisDirectionSunk(int xPos, int yPos, Direction direction) 
     int recentXPos = xPos;
     int recentYPos = yPos;
     while (true) {
-        switch (direction) {
-            case Direction::left: //LLC hier wieder der punkt von Info was es bedeutet links zu sein in das enum
-                if (recentXPos - 1 > 0 && shipField[recentXPos-2][recentYPos-1]) {
-                    guessField[recentXPos-2][recentYPos-1] = GuessStatus::sunkShip;
-                    recentXPos--;
-                } else {
-                    return;
-                }
-            case Direction::right:
-                if (recentXPos + 1 < 11 && shipField[recentXPos][recentYPos-1]) {
-                    guessField[recentXPos][recentYPos-1] = GuessStatus::sunkShip;
-                    recentXPos++;
-                } else {
-                    return;
-                }
-            case Direction::up:
-                if (recentYPos - 1 > 0 && shipField[recentXPos-1][recentYPos-2]) {
-                    guessField[recentXPos-1][recentYPos-2] = GuessStatus::sunkShip;
-                    recentYPos--;
-                } else {
-                    return;
-                }
-            case Direction::down:
-                if (recentYPos + 1 < 11 && shipField[recentXPos-1][recentYPos]) {
-                    guessField[recentXPos-1][recentYPos] = GuessStatus::sunkShip;
-                    recentYPos++;
-                } else {
-                    return;
-                }
+        if (direction == Direction::left) {
+            if (rule->insideField(recentXPos - 1) && shipField[recentXPos-1][recentYPos]) {
+                guessField[recentXPos-1][recentYPos] = GuessStatus::sunkShip;
+                recentXPos--;
+            } else {
+                return;
+            }
+        } else if (direction == Direction::right) {
+            if (rule->insideField(recentXPos + 1) && shipField[recentXPos+1][recentYPos]) {
+                guessField[recentXPos+1][recentYPos] = GuessStatus::sunkShip;
+                recentXPos++;
+            } else {
+                return;
+            }
+        } else if (direction == Direction::up) {
+            if (rule->insideField(recentYPos - 1) && shipField[recentXPos][recentYPos-1]) {
+                guessField[recentXPos][recentYPos-1] = GuessStatus::sunkShip;
+                recentYPos--;
+            } else {
+                return;
+            }
+        } else {
+            if (rule->insideField(recentYPos + 1) && shipField[recentXPos][recentYPos+1]) {
+                guessField[recentXPos][recentYPos+1] = GuessStatus::sunkShip;
+                recentYPos++;
+            } else {
+                return;
+            }
         }
+//        switch (direction) {
+//            case Direction::left: //LLC hier wieder der punkt von Info was es bedeutet links zu sein in das enum
+//                if (recentXPos - 1 > 0 && shipField[recentXPos-2][recentYPos-1]) {
+//                    guessField[recentXPos-2][recentYPos-1] = GuessStatus::sunkShip;
+//                    recentXPos--;
+//                } else {
+//                    return;
+//                }
+//            case Direction::right:
+//                if (recentXPos + 1 < 11 && shipField[recentXPos][recentYPos-1]) {
+//                    guessField[recentXPos][recentYPos-1] = GuessStatus::sunkShip;
+//                    recentXPos++;
+//                } else {
+//                    return;
+//                }
+//            case Direction::up:
+//                if (recentYPos - 1 > 0 && shipField[recentXPos-1][recentYPos-2]) {
+//                    guessField[recentXPos-1][recentYPos-2] = GuessStatus::sunkShip;
+//                    recentYPos--;
+//                } else {
+//                    return;
+//                }
+//            case Direction::down:
+//                if (recentYPos + 1 < 11 && shipField[recentXPos-1][recentYPos]) {
+//                    guessField[recentXPos-1][recentYPos] = GuessStatus::sunkShip;
+//                    recentYPos++;
+//                } else {
+//                    return;
+//                }
+//        }
     }
 }
 

@@ -12,8 +12,8 @@ std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board>
     int directionSelector;
     Direction direction;
     do {
-        xPos = GetRandomNumberBetween(1, 10);
-        yPos = GetRandomNumberBetween(1, 10);
+        xPos = GetRandomNumberBetween(0, 9);
+        yPos = GetRandomNumberBetween(0, 9);
         directionSelector = GetRandomNumberBetween(1, 4);
         if (directionSelector == 1) {
             direction = Direction::up;
@@ -40,37 +40,41 @@ std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
 std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) {
     int makeCalculatedGuessNumber = GetRandomNumberBetween(0, 10) + smartness;
     //LLC wenn das random über 10 ist macht er einen bedachten guess, sonst einfach random
-    int xPosGuessedRightField = 0;
-    int yPosGuessedRightField = 0;
+    int xPosGuessedRightField = -1;
+    int yPosGuessedRightField = -1;
     std::vector<Coordinates> freeFields;
-    for (int xPos = 1; xPos < 11; ++xPos) {
-        for (int yPos = 1; yPos < 11; ++yPos) {
-            if (board->guessField[xPos - 1][yPos - 1] == GuessStatus::notGuessed) {
+    for (int xPos = 0; xPos < 10; xPos++) {
+        for (int yPos = 0; yPos < 10; yPos++) {
+            if (board->guessField[xPos][yPos] == GuessStatus::notGuessed) {
                 freeFields.emplace_back(xPos, yPos);
             }
-            if (board->guessField[xPos - 1][yPos - 1] == GuessStatus::guessedRight &&
+            if (board->guessField[xPos][yPos] == GuessStatus::guessedRight && // Schiff wurde getroffen, aber noch nicht zerstört
                 makeCalculatedGuessNumber >= 10) {//LLC guessed right um versenkte schiffe zu vermeiden
+                // speichert die Koordinaten an, denen ein Schiff getroffen wurde in die Variablen ab
                 xPosGuessedRightField = xPos;
                 yPosGuessedRightField = yPos;
             }
         }
     }
-    int xPosNextToGuessedRightField = 0;
-    int yPosNextToGuessedRightField = 0;
-    if (xPosGuessedRightField != 0 && yPosGuessedRightField != 0) {
-        if (xPosGuessedRightField + 1 < 11 &&
+    int xPosNextToGuessedRightField;
+    int yPosNextToGuessedRightField;
+    if (xPosGuessedRightField != -1 && yPosGuessedRightField != -1) {
+        // wenn ein Feld gefunden wurde, an dem ein Schiff getroffen aber nicht zerstört wurde, wird geschaut,
+        // welches der umliegenden Felder noch nicht beschossen wurde (es muss zwingend 1 geben)
+        // → Resultat in Variablen gespeichert
+        if (xPosGuessedRightField + 1 <= 9 &&
             board->guessField[xPosGuessedRightField][yPosGuessedRightField - 1] == GuessStatus::notGuessed) {
             xPosNextToGuessedRightField = xPosGuessedRightField + 1;
             yPosNextToGuessedRightField = yPosNextToGuessedRightField;
-        } else if (xPosGuessedRightField - 1 > 0 &&
+        } else if (xPosGuessedRightField - 1 >= 0 &&
                    board->guessField[xPosGuessedRightField - 2][yPosGuessedRightField - 1] == GuessStatus::notGuessed) {
             xPosNextToGuessedRightField = xPosGuessedRightField - 1;
             yPosNextToGuessedRightField = yPosNextToGuessedRightField;
-        } else if (yPosNextToGuessedRightField + 1 < 11 &&
+        } else if (yPosNextToGuessedRightField + 1 <= 9 &&
                    board->guessField[xPosGuessedRightField - 1][yPosGuessedRightField] == GuessStatus::notGuessed) {
             xPosNextToGuessedRightField = xPosGuessedRightField;
             yPosNextToGuessedRightField = yPosNextToGuessedRightField + 1;
-        } else if (yPosNextToGuessedRightField - 1 > 0 &&
+        } else if (yPosNextToGuessedRightField - 1 >= 0 &&
                    board->guessField[xPosGuessedRightField - 1][yPosGuessedRightField - 2] == GuessStatus::notGuessed) {
             xPosNextToGuessedRightField = xPosGuessedRightField;
             yPosNextToGuessedRightField = yPosNextToGuessedRightField - 1;
