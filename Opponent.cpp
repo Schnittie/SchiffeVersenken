@@ -6,7 +6,7 @@
 #include "CppRandom.hpp"
 
 std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board> board, int shipSize) {
-    // probiert zufällige Kombinationen aus bis Schiff platzierbar //LLC ist es eine Idee erst zu schauen wo möglich und dann random zu setzen
+    // probiert zufällige Kombinationen aus bis Schiff platzierbar
     int xPos;
     int yPos;
     int directionSelector;
@@ -29,7 +29,7 @@ std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board>
 }
 
 std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
-    for (int shipSize = 5; shipSize > 1; shipSize--) { //LLC also es gibt ein schiff mit jeder größe 2-5 ein mal
+    for (int shipSize = 5; shipSize > 1; shipSize--) {
         for (int shipNumber = 0; shipNumber < 6-shipSize; shipNumber++) {
             board = addRandomShipOfGivenSize(std::move(board), shipSize);
         }
@@ -39,7 +39,6 @@ std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
 
 std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) {
     int makeCalculatedGuessNumber = GetRandomNumberBetween(0, 10) + smartness;
-    //LLC wenn das random über 10 ist macht er einen bedachten guess, sonst einfach random
     int xPosGuessedRightField = -1;
     int yPosGuessedRightField = -1;
     std::vector<Coordinates> freeFields;
@@ -49,7 +48,7 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) {
                 freeFields.emplace_back(xPos, yPos);
             }
             if (board->guessField[xPos][yPos] == GuessStatus::guessedRight && // Schiff wurde getroffen, aber noch nicht zerstört
-                makeCalculatedGuessNumber >= 10) {//LLC guessed right um versenkte schiffe zu vermeiden
+                makeCalculatedGuessNumber >= 10) {
                 // speichert die Koordinaten an, denen ein Schiff getroffen wurde in die Variablen ab
                 xPosGuessedRightField = xPos;
                 yPosGuessedRightField = yPos;
@@ -78,8 +77,7 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) {
                    board->guessField[xPosGuessedRightField - 1][yPosGuessedRightField - 2] == GuessStatus::notGuessed) {
             xPosNextToGuessedRightField = xPosGuessedRightField;
             yPosNextToGuessedRightField = yPosNextToGuessedRightField - 1;
-        }//LLC es werden alle felder um das richtige feld herum angeschaut auf die noch nicht geguessed wurde und es wird das letze davon danach geguessed
-        //LLC eine noch schlauerere opponent würde schauen ob es bereits eine Reihe an richtigen guesses gibt und diese fortsetzen
+        }
         if (board->makeGuess(xPosNextToGuessedRightField, yPosNextToGuessedRightField) !=
             GuessStatus::guessImpossible) {
             return std::move(board);
@@ -97,4 +95,3 @@ std::unique_ptr<Board> Opponent::guessRandom(std::unique_ptr<Board> board, std::
     return std::move(board);
 }
 
-Coordinates::Coordinates(int xCoordinate, int yCoordinate): x(xCoordinate), y(yCoordinate) {}

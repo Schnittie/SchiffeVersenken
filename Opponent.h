@@ -10,12 +10,7 @@
 #include "Board.h"
 
 
-class Coordinates {
-public:
-    int x;
-    int y;
-    Coordinates(int, int);
-};
+
 
 class Opponent {
 public:

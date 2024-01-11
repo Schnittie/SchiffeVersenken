@@ -14,12 +14,12 @@ enum class Direction;
 class GameRule {
 public:
     // gib true zurück wenn Schiff in Bord platzierbar, sonst false
-    bool shipAddCorrect(int, int, int, Direction, std::unique_ptr<Board>);
-    bool shipDestroyed(int, int, std::unique_ptr<Board>);
-    bool insideField(int);
-    bool insideField(int, int);
+    static bool shipAddCorrect(int, int, int, Direction, std::unique_ptr<Board>);
+    static bool shipDestroyed(int, int, std::unique_ptr<Board>);
+    static bool insideField(int);
+    static bool insideField(int, int);
 private:
-    bool shipInThisDirectionDestroyed(int, int, std::unique_ptr<Board>, Direction);
+    static bool shipInThisDirectionDestroyed(int, int, std::unique_ptr<Board>, Direction);
 };
 
 

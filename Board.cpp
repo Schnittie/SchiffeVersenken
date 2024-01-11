@@ -13,13 +13,10 @@ Board::Board() {
             guessField[xPos][yPos] = GuessStatus::notGuessed;
         }
     }
-    // richte unique_ptr auf GameRule ein
-    auto* gameRule = new GameRule; //LLC was ist eine instanz von Gamerule, hatten wir sowas wie static methoden / brauchen wir um methoden hinzuzufügen überhaupt eine klasse
-    rule = std::unique_ptr<GameRule>(gameRule);
 }
 
 bool Board::addShip(int size, int xPos, int yPos, Direction direction) { // angenommen xPos und yPos sind die Positionen im Array, also 0-9
-    if (rule->shipAddCorrect(size, xPos, yPos, direction, createCopy())) {
+    if (GameRule::shipAddCorrect(size, xPos, yPos, direction, createCopy())) {
         // wenn shipAddCorrect true zurückgibt, dann Platzierung des Schiffs erlaubt → Felder setzen
         int fieldsToSet = size;
         int recentXPos = xPos;
@@ -27,6 +24,7 @@ bool Board::addShip(int size, int xPos, int yPos, Direction direction) { // ange
         while (fieldsToSet > 0) {
             shipField[recentXPos][recentYPos] = true;
             // passe Variablen für (je nach Direction) neuem Feld an
+
             if (direction == Direction::left) {
                 recentXPos--;
             } else if (direction == Direction::right) {
@@ -34,7 +32,7 @@ bool Board::addShip(int size, int xPos, int yPos, Direction direction) { // ange
             } else if (direction == Direction::up) {
                 recentYPos--;
             } else{
-                recentYPos++;//LLC mein Switch herz leidet
+                recentYPos++;
             }
             fieldsToSet--;
         }
@@ -46,27 +44,27 @@ bool Board::addShip(int size, int xPos, int yPos, Direction direction) { // ange
 
 GuessStatus Board::makeGuess(int xPos, int yPos) {
     // angegebenes Feld ist innerhalb des Boards und wurde noch nicht guessed
-    if (rule->insideField(xPos, yPos) && guessField[xPos][yPos] == GuessStatus::notGuessed) {
+    if (GameRule::insideField(xPos, yPos) && guessField[xPos][yPos] == GuessStatus::notGuessed) {
         // an angegebenem Feld befindet sich ein Schiff
         if (shipField[xPos][yPos]) {
-            if (rule->shipDestroyed(xPos, yPos, createCopy())) {
+            if (GameRule::shipDestroyed(xPos, yPos, createCopy())) {
                 // wird das angegebene Feld aufgedeckt, wird dadurch ein Schiff zerstört
                 guessField[xPos][yPos] = GuessStatus::sunkShip;
                 // setze alle weiteren angrenzenden Schiffsfelder auf Status sunk
-                if (rule->insideField(xPos - 1) && shipField[xPos-1][yPos]) {
+                if (GameRule::insideField(xPos - 1) && shipField[xPos-1][yPos]) {
                     setShipInThisDirectionSunk(xPos, yPos, Direction::left);
                 }
-                if (rule->insideField(xPos + 1) && shipField[xPos+1][yPos]) {
+                if (GameRule::insideField(xPos + 1) && shipField[xPos+1][yPos]) {
                     setShipInThisDirectionSunk(xPos, yPos, Direction::right);
                 }
-                if (rule->insideField(yPos - 1) && shipField[xPos][yPos-1]) {
+                if (GameRule::insideField(yPos - 1) && shipField[xPos][yPos-1]) {
                     setShipInThisDirectionSunk(xPos, yPos, Direction::up);
                 }
-                if (rule->insideField(yPos + 1) && shipField[xPos][yPos+1]) {
+                if (GameRule::insideField(yPos + 1) && shipField[xPos][yPos+1]) {
                     setShipInThisDirectionSunk(xPos, yPos, Direction::down);
                 }
                 std::cout << std::endl;
-                return GuessStatus::sunkShip; //LLC das müsste auch geändert werden für angrenzenden Schiffe
+                return GuessStatus::sunkShip;
             } else {
                 // wird das angegebene Feld aufgedeckt, wird dadurch kein Schiff zerstört
                 guessField[xPos][yPos] = GuessStatus::guessedRight;
@@ -89,64 +87,34 @@ void Board::setShipInThisDirectionSunk(int xPos, int yPos, Direction direction) 
     int recentYPos = yPos;
     while (true) {
         if (direction == Direction::left) {
-            if (rule->insideField(recentXPos - 1) && shipField[recentXPos-1][recentYPos]) {
+            if (GameRule::insideField(recentXPos - 1) && shipField[recentXPos-1][recentYPos]) {
                 guessField[recentXPos-1][recentYPos] = GuessStatus::sunkShip;
                 recentXPos--;
             } else {
                 return;
             }
         } else if (direction == Direction::right) {
-            if (rule->insideField(recentXPos + 1) && shipField[recentXPos+1][recentYPos]) {
+            if (GameRule::insideField(recentXPos + 1) && shipField[recentXPos+1][recentYPos]) {
                 guessField[recentXPos+1][recentYPos] = GuessStatus::sunkShip;
                 recentXPos++;
             } else {
                 return;
             }
         } else if (direction == Direction::up) {
-            if (rule->insideField(recentYPos - 1) && shipField[recentXPos][recentYPos-1]) {
+            if (GameRule::insideField(recentYPos - 1) && shipField[recentXPos][recentYPos-1]) {
                 guessField[recentXPos][recentYPos-1] = GuessStatus::sunkShip;
                 recentYPos--;
             } else {
                 return;
             }
         } else {
-            if (rule->insideField(recentYPos + 1) && shipField[recentXPos][recentYPos+1]) {
+            if (GameRule::insideField(recentYPos + 1) && shipField[recentXPos][recentYPos+1]) {
                 guessField[recentXPos][recentYPos+1] = GuessStatus::sunkShip;
                 recentYPos++;
             } else {
                 return;
             }
         }
-//        switch (direction) {
-//            case Direction::left: //LLC hier wieder der punkt von Info was es bedeutet links zu sein in das enum
-//                if (recentXPos - 1 > 0 && shipField[recentXPos-2][recentYPos-1]) {
-//                    guessField[recentXPos-2][recentYPos-1] = GuessStatus::sunkShip;
-//                    recentXPos--;
-//                } else {
-//                    return;
-//                }
-//            case Direction::right:
-//                if (recentXPos + 1 < 11 && shipField[recentXPos][recentYPos-1]) {
-//                    guessField[recentXPos][recentYPos-1] = GuessStatus::sunkShip;
-//                    recentXPos++;
-//                } else {
-//                    return;
-//                }
-//            case Direction::up:
-//                if (recentYPos - 1 > 0 && shipField[recentXPos-1][recentYPos-2]) {
-//                    guessField[recentXPos-1][recentYPos-2] = GuessStatus::sunkShip;
-//                    recentYPos--;
-//                } else {
-//                    return;
-//                }
-//            case Direction::down:
-//                if (recentYPos + 1 < 11 && shipField[recentXPos-1][recentYPos]) {
-//                    guessField[recentXPos-1][recentYPos] = GuessStatus::sunkShip;
-//                    recentYPos++;
-//                } else {
-//                    return;
-//                }
-//        }
     }
 }
 
@@ -168,7 +136,7 @@ void Board::printGuessField() {
             } else if (i[c-65] == GuessStatus::notGuessed) {
                 output += "~  ";
             }
-            // Zeile des Guess Fields (c-65 ist Zahl von 0 bis 9, da ASCII-Wert von A = 65 und J = 74) //LLC ich vertraue dir
+            // Zeile des Guess Fields (c-65 ist Zahl von 0 bis 9, da ASCII-Wert von A = 65 und J = 74)
         }
         std::cout << output << "     " << std::endl;
     }
@@ -198,7 +166,7 @@ void Board::printShipField() {
 
 std::unique_ptr<Board> Board::createCopy() {
     // Erstelle einen neuen std::unique_ptr, der auf eine Kopie des aktuellen Objekts zeigt
-    std::unique_ptr<Board> boardCopy = std::make_unique<Board>();//LLC wir arbeiten mit pointern also bist du sicher das das eine kopie ist
+    std::unique_ptr<Board> boardCopy = std::make_unique<Board>();
     for (int i = 0; i < 10; ++i) {
         for (int j = 0; j < 10; ++j) {
             boardCopy->guessField[i][j] = guessField[i][j];
@@ -208,6 +176,26 @@ std::unique_ptr<Board> Board::createCopy() {
     return boardCopy;
 }
 
-Board::~Board() {
-    rule = nullptr;
+Coordinates::Coordinates(int xCoordinate, int yCoordinate) : x(xCoordinate), y(yCoordinate) {}
+
+Coordinates::Coordinates(Direction dir) {
+    switch (dir) {
+        case Direction::down:
+            x = 0;
+            y = 1;
+            break;
+        case Direction::up:
+            x = 0;
+            y = -1;
+            break;
+        case Direction::left:
+            x = -1;
+            y = 0;
+            break;
+        case Direction::right:
+            x = 1;
+            y = 0;
+            break;
+    }
 }
+
