@@ -8,8 +8,7 @@
 
 #include <memory>
 #include "Board.h"
-
-
+#include "Coordinates.h"
 
 
 class Opponent {

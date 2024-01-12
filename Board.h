@@ -9,26 +9,9 @@
 #include <vector>
 #include <memory>
 #include "GameRule.h"
+#include "Coordinates.h"
 
 class GameRule;
-
-enum class Direction {
-    left,
-    right,
-    up,
-    down
-};
-
-class Coordinates {
-public:
-    int x;
-    int y;
-
-    Coordinates(int, int);
-
-    Coordinates(Direction);
-};
-
 
 
 
@@ -43,7 +26,7 @@ enum class GuessStatus {
 
 class Board {
 private:
-    void setShipInThisDirectionSunk(int, int, Direction);
+    void setShipInThisDirectionSunk(Coordinates, Direction);
 
 public:
     std::unique_ptr<Board> createCopy();
@@ -54,9 +37,9 @@ public:
     Board();
 
     //Methode bekommt Größe, Ursprungsposition (x und y) und Ausrichtung von Ursprungsposition aus und gibt bool zurück, ob Platzierung geklappt hat
-    bool addShip(int, int, int, Direction);
+    bool addShip(int, Coordinates, Direction);
 
-    GuessStatus makeGuess(int, int);
+    GuessStatus makeGuess(Coordinates);
 
     void printGuessField();
 

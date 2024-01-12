@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include "Board.h"
+#include "Coordinates.h"
 
 Board::Board() {
     // initialisiere beide Felder
@@ -15,25 +16,16 @@ Board::Board() {
     }
 }
 
-bool Board::addShip(int size, int xPos, int yPos, Direction direction) { // angenommen xPos und yPos sind die Positionen im Array, also 0-9
-    if (GameRule::shipAddCorrect(size, xPos, yPos, direction, createCopy())) {
+bool Board::addShip(int size, Coordinates coordinates,
+                    Direction direction) { // angenommen xPos und yPos sind die Positionen im Array, also 0-9
+    if (GameRule::shipAddCorrect(size, coordinates, direction, createCopy())) {
         // wenn shipAddCorrect true zurückgibt, dann Platzierung des Schiffs erlaubt → Felder setzen
         int fieldsToSet = size;
-        int recentXPos = xPos;
-        int recentYPos = yPos;
+        Coordinates currentCoordinates = Coordinates(coordinates.x, coordinates.y);
         while (fieldsToSet > 0) {
-            shipField[recentXPos][recentYPos] = true;
+            shipField[currentCoordinates.x][currentCoordinates.y] = true;
             // passe Variablen für (je nach Direction) neuem Feld an
-
-            if (direction == Direction::left) {
-                recentXPos--;
-            } else if (direction == Direction::right) {
-                recentXPos++;
-            } else if (direction == Direction::up) {
-                recentYPos--;
-            } else{
-                recentYPos++;
-            }
+            currentCoordinates = Coordinates::applyDirectionChange(currentCoordinates, direction);
             fieldsToSet--;
         }
         return true;
@@ -42,79 +34,45 @@ bool Board::addShip(int size, int xPos, int yPos, Direction direction) { // ange
     }
 }
 
-GuessStatus Board::makeGuess(int xPos, int yPos) {
-    // angegebenes Feld ist innerhalb des Boards und wurde noch nicht guessed
-    if (GameRule::insideField(xPos, yPos) && guessField[xPos][yPos] == GuessStatus::notGuessed) {
-        // an angegebenem Feld befindet sich ein Schiff
-        if (shipField[xPos][yPos]) {
-            if (GameRule::shipDestroyed(xPos, yPos, createCopy())) {
-                // wird das angegebene Feld aufgedeckt, wird dadurch ein Schiff zerstört
-                guessField[xPos][yPos] = GuessStatus::sunkShip;
-                // setze alle weiteren angrenzenden Schiffsfelder auf Status sunk
-                if (GameRule::insideField(xPos - 1) && shipField[xPos-1][yPos]) {
-                    setShipInThisDirectionSunk(xPos, yPos, Direction::left);
-                }
-                if (GameRule::insideField(xPos + 1) && shipField[xPos+1][yPos]) {
-                    setShipInThisDirectionSunk(xPos, yPos, Direction::right);
-                }
-                if (GameRule::insideField(yPos - 1) && shipField[xPos][yPos-1]) {
-                    setShipInThisDirectionSunk(xPos, yPos, Direction::up);
-                }
-                if (GameRule::insideField(yPos + 1) && shipField[xPos][yPos+1]) {
-                    setShipInThisDirectionSunk(xPos, yPos, Direction::down);
-                }
-                std::cout << std::endl;
-                return GuessStatus::sunkShip;
-            } else {
-                // wird das angegebene Feld aufgedeckt, wird dadurch kein Schiff zerstört
-                guessField[xPos][yPos] = GuessStatus::guessedRight;
-                return GuessStatus::guessedRight;
-            }
-        } else {
-            // am angegebenen Feld befindet sich kein Schiff
-            guessField[xPos][yPos] = GuessStatus::guessedWrong;
-            return GuessStatus::guessedWrong;
-        }
-    } else {
-        // das angegebene Feld ist entweder außerhalb des Boards oder wurde schon guessed
+GuessStatus Board::makeGuess(Coordinates coordinates) {
+    // das angegebene Feld ist entweder außerhalb des Boards oder wurde schon guessed
+    if (!GameRule::insideField(coordinates) || guessField[coordinates.x][coordinates.y] != GuessStatus::notGuessed) {
         return GuessStatus::guessImpossible;
     }
+    // am angegebenen Feld befindet sich kein Schiff
+    if (!shipField[coordinates.x][coordinates.y]) {
+        guessField[coordinates.x][coordinates.y] = GuessStatus::guessedWrong;
+        return GuessStatus::guessedWrong;
+    }
+    if (GameRule::shipDestroyed(coordinates, createCopy())) {
+        // wird das angegebene Feld aufgedeckt, wird dadurch ein Schiff zerstört
+        guessField[coordinates.x][coordinates.y] = GuessStatus::sunkShip;
+        // setze alle weiteren angrenzenden Schiffsfelder auf Status sunk
+        for (Direction dir: Coordinates::getListOfAllDirections()) {
+            Coordinates appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, dir);
+            if (GameRule::insideField(appliedDirectionCoordinates)
+                && shipField[appliedDirectionCoordinates.x][appliedDirectionCoordinates.y]) {
+                setShipInThisDirectionSunk(coordinates, dir);
+            }
+        }
+        std::cout << std::endl;
+        return GuessStatus::sunkShip;
+    }
+    // wird das angegebene Feld aufgedeckt, wird dadurch kein Schiff zerstört
+    guessField[coordinates.x][coordinates.y] = GuessStatus::guessedRight;
+    return GuessStatus::guessedRight;
+
 }
 
 // setzt alle Felder in der angegebenem Richtung auf Status sunk bis es auf das Ende des Boards oder ein Feld ohne Schiff stößt
-void Board::setShipInThisDirectionSunk(int xPos, int yPos, Direction direction) {
-    int recentXPos = xPos;
-    int recentYPos = yPos;
+void Board::setShipInThisDirectionSunk(Coordinates coordinates, Direction direction) {
+    Coordinates currentCoordinates = Coordinates(coordinates.x, coordinates.y);
     while (true) {
-        if (direction == Direction::left) {
-            if (GameRule::insideField(recentXPos - 1) && shipField[recentXPos-1][recentYPos]) {
-                guessField[recentXPos-1][recentYPos] = GuessStatus::sunkShip;
-                recentXPos--;
-            } else {
-                return;
-            }
-        } else if (direction == Direction::right) {
-            if (GameRule::insideField(recentXPos + 1) && shipField[recentXPos+1][recentYPos]) {
-                guessField[recentXPos+1][recentYPos] = GuessStatus::sunkShip;
-                recentXPos++;
-            } else {
-                return;
-            }
-        } else if (direction == Direction::up) {
-            if (GameRule::insideField(recentYPos - 1) && shipField[recentXPos][recentYPos-1]) {
-                guessField[recentXPos][recentYPos-1] = GuessStatus::sunkShip;
-                recentYPos--;
-            } else {
-                return;
-            }
-        } else {
-            if (GameRule::insideField(recentYPos + 1) && shipField[recentXPos][recentYPos+1]) {
-                guessField[recentXPos][recentYPos+1] = GuessStatus::sunkShip;
-                recentYPos++;
-            } else {
-                return;
-            }
+        currentCoordinates = Coordinates::applyDirectionChange(currentCoordinates, direction);
+        if (!GameRule::insideField(currentCoordinates) || !shipField[currentCoordinates.x][currentCoordinates.y]) {
+            return;
         }
+        guessField[currentCoordinates.x][currentCoordinates.y] = GuessStatus::sunkShip;
     }
 }
 
@@ -123,17 +81,17 @@ void Board::printGuessField() {
     // oberer Rand
     for (char c = 'A'; c <= 'J'; c++) {
         std::string output = " ";
-        output +=  c;
+        output += c;
         output += "   ";
         // seitlicher Rand
-        for (auto & i : guessField) {
-            if (i[c-65] == GuessStatus::sunkShip) {
+        for (auto &i: guessField) {
+            if (i[c - 65] == GuessStatus::sunkShip) {
                 output += "#  ";
-            } else if (i[c-65] == GuessStatus::guessedRight) {
+            } else if (i[c - 65] == GuessStatus::guessedRight) {
                 output += "x  ";
-            } else if (i[c-65] == GuessStatus::guessedWrong) {
+            } else if (i[c - 65] == GuessStatus::guessedWrong) {
                 output += "   ";
-            } else if (i[c-65] == GuessStatus::notGuessed) {
+            } else if (i[c - 65] == GuessStatus::notGuessed) {
                 output += "~  ";
             }
             // Zeile des Guess Fields (c-65 ist Zahl von 0 bis 9, da ASCII-Wert von A = 65 und J = 74)
@@ -148,10 +106,10 @@ void Board::printShipField() {
     // oberer Rand
     for (char c = 'A'; c <= 'J'; c++) {
         std::string output = " ";
-        output +=  c;
+        output += c;
         output += "   ";
         // seitlicher Rand
-        for (auto & i : shipField) {
+        for (auto &i: shipField) {
             if (i[c - 65]) {
                 output += "#  ";
             } else {
@@ -174,28 +132,5 @@ std::unique_ptr<Board> Board::createCopy() {
         }
     }
     return boardCopy;
-}
-
-Coordinates::Coordinates(int xCoordinate, int yCoordinate) : x(xCoordinate), y(yCoordinate) {}
-
-Coordinates::Coordinates(Direction dir) {
-    switch (dir) {
-        case Direction::down:
-            x = 0;
-            y = 1;
-            break;
-        case Direction::up:
-            x = 0;
-            y = -1;
-            break;
-        case Direction::left:
-            x = -1;
-            y = 0;
-            break;
-        case Direction::right:
-            x = 1;
-            y = 0;
-            break;
-    }
 }
 
