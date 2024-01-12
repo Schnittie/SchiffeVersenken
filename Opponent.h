@@ -10,7 +10,7 @@
 #include "Board.h"
 #include "Coordinates.h"
 
-
+class Coordinates;
 class Opponent {
 public:
     // "Schwierigkeitsscore" (0-10)

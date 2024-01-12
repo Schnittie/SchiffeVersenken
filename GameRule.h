@@ -10,6 +10,7 @@
 class Board;
 
 enum class Direction;
+class Coordinates;
 
 class GameRule {
 public:

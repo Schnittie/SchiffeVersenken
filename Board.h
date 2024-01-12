@@ -13,7 +13,7 @@
 
 class GameRule;
 
-
+class Coordinates;
 
 enum class GuessStatus {
     notGuessed,

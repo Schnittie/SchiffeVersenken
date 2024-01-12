@@ -13,7 +13,7 @@ std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board>
     do {
         coordinates = Coordinates(GetRandomNumberBetween(0, 9), GetRandomNumberBetween(0, 9));
         std::vector<Direction> allDirectons = Coordinates::getListOfAllDirections();
-        direction = allDirectons.at(GetRandomNumberBetween(0, allDirectons.size()));
+        direction = allDirectons.at(GetRandomNumberBetween(0, allDirectons.size()-1));
     } while (!board->addShip(shipSize, coordinates, direction));
     return std::move(board);
 }
