@@ -12,9 +12,11 @@ std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board>
     Direction direction;
     do {
         coordinates = Coordinates(GetRandomNumberBetween(0, 9), GetRandomNumberBetween(0, 9));
-        std::vector<Direction> allDirectons = Coordinates::getListOfAllDirections();
-        direction = allDirectons.at(GetRandomNumberBetween(0, allDirectons.size()-1));
+        std::vector<Direction> allDirections = Coordinates::getListOfAllDirections();
+        direction = allDirections.at(GetRandomNumberBetween(0, allDirections.size()-1));
     } while (!board->addShip(shipSize, coordinates, direction));
+    // probiert so lange aus ein Schiff der gegebenen Länge an einer zufälligen Koordinate
+    // gerichtet in eine zufällige Richtung zu setzen, bis es klappt
     return std::move(board);
 }
 
@@ -24,17 +26,18 @@ std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
             board = addRandomShipOfGivenSize(std::move(board), shipSize);
         }
     }
+    // setzt alle zu platzierenden Schiffe zufällig (1 der Göße 5, 2 der Größe 4, 3 der Größe 3, 4 der Größe 2)
     return board;
 }
 
-std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hier hab ich nur xPos yPos durch Coords getauscht aber sonst kein refactoring betrieben weil wir uns diese Methode glaube ich sowieso nochmal anschauen müssen
+std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hier hab ich nur xPos yPos durch Coords getauscht aber sonst kein refactoring betrieben, weil wir uns diese Methode glaube ich sowieso nochmal anschauen müssen
     int makeCalculatedGuessNumber = GetRandomNumberBetween(0, 10) + smartness;
     Coordinates guessedRightFieldCoordinates = Coordinates(-1, -1);
-    std::vector<Coordinates> freeFields;
+    std::vector<Coordinates> unGuessedFields;
     for (int xPos = 0; xPos < 10; xPos++) {
         for (int yPos = 0; yPos < 10; yPos++) {
             if (board->guessField[xPos][yPos] == GuessStatus::notGuessed) {
-                freeFields.emplace_back(xPos, yPos);
+                unGuessedFields.emplace_back(xPos, yPos);
             }
             if (board->guessField[xPos][yPos] == GuessStatus::guessedRight &&
                 // Schiff wurde getroffen, aber noch nicht zerstört
@@ -70,16 +73,17 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hi
             GuessStatus::guessImpossible) {
             return std::move(board);
         } else {
-            return guessRandom(std::move(board), freeFields);
+            return guessRandom(std::move(board), unGuessedFields);
         }
     } else {
-        return guessRandom(std::move(board), freeFields);
+        return guessRandom(std::move(board), unGuessedFields);
     }
 }
 
-std::unique_ptr<Board> Opponent::guessRandom(std::unique_ptr<Board> board, std::vector<Coordinates> freeFields) {
-    int randomFreeField = GetRandomNumberBetween(0, freeFields.size() - 1);
-    board->makeGuess(freeFields.at(randomFreeField));
+std::unique_ptr<Board> Opponent::guessRandom(std::unique_ptr<Board> board, std::vector<Coordinates> unGuessedFields) {
+    int randomFreeField = GetRandomNumberBetween(0, unGuessedFields.size() - 1);
+    board->makeGuess(unGuessedFields.at(randomFreeField));
     return std::move(board);
+    // guessed ein zufälliges Feld der gegebenen Liste der noch verdeckten Felder
 }
 

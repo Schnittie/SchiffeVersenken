@@ -17,62 +17,72 @@ Board::Board() {
 }
 
 bool Board::addShip(int size, Coordinates coordinates,
-                    Direction direction) { // angenommen xPos und yPos sind die Positionen im Array, also 0-9
+                    Direction direction) { // xPos und yPos sind die Positionen im Array, also 0-9
     if (GameRule::shipAddCorrect(size, coordinates, direction, createCopy())) {
         // wenn shipAddCorrect true zurückgibt, dann Platzierung des Schiffs erlaubt → Felder setzen
-        int fieldsToSet = size;
-        Coordinates currentCoordinates = Coordinates(coordinates.x, coordinates.y);
-        while (fieldsToSet > 0) {
-            shipField[currentCoordinates.x][currentCoordinates.y] = true;
-            // passe Variablen für (je nach Direction) neuem Feld an
-            currentCoordinates = Coordinates::applyDirectionChange(currentCoordinates, direction);
-            fieldsToSet--;
+        int fieldsLeftToSet = size;
+        // Anzahl der Felder die noch gesetzt werden müssen
+        while (fieldsLeftToSet > 0) {
+            // solange noch Felder gesetzt werden müssen
+            shipField[coordinates.x][coordinates.y] = true;
+            // an der Position [coordinates.x][coordinates.y] befindet sich im shipField ein Schiff, da true
+            coordinates = Coordinates::applyDirectionChange(coordinates, direction);
+            // passe Koordinaten für (je nach Direction) neuem Feld an
+            fieldsLeftToSet--;
+            // ein Feld wurde gesetzt → eins weniger zu setzen
         }
         return true;
+        // alles erfolgreich, Kombination war möglich zu setzen
     } else {
         return false;
+        // alles erfolgreich, Kombination war möglich zu setzen
     }
 }
 
 GuessStatus Board::makeGuess(Coordinates coordinates) {
-    // das angegebene Feld ist entweder außerhalb des Boards oder wurde schon guessed
     if (!GameRule::insideField(coordinates) || guessField[coordinates.x][coordinates.y] != GuessStatus::notGuessed) {
+        // das angegebene Feld ist entweder außerhalb des Boards oder wurde schon guessed
         return GuessStatus::guessImpossible;
     }
-    // am angegebenen Feld befindet sich kein Schiff
     if (!shipField[coordinates.x][coordinates.y]) {
+        // am angegebenen Feld befindet sich kein Schiff
         guessField[coordinates.x][coordinates.y] = GuessStatus::guessedWrong;
         return GuessStatus::guessedWrong;
     }
     if (GameRule::shipDestroyed(coordinates, createCopy())) {
-        // wird das angegebene Feld aufgedeckt, wird dadurch ein Schiff zerstört
+        // wird das angegebene Feld aufgedeckt, wird dadurch ein Schiff komplett zerstört
         guessField[coordinates.x][coordinates.y] = GuessStatus::sunkShip;
-        // setze alle weiteren angrenzenden Schiffsfelder auf Status sunk
         for (Direction dir: Coordinates::getListOfAllDirections()) {
             Coordinates appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, dir);
+            //gehe die in alle 4 Richtungen angrenzenden Felder durch
             if (GameRule::insideField(appliedDirectionCoordinates)
                 && shipField[appliedDirectionCoordinates.x][appliedDirectionCoordinates.y]) {
                 setShipInThisDirectionSunk(coordinates, dir);
+                // wenn sich im aktuell behandelten (angrenzenden) Feld ein Teil des Schiffs befindet,
+                // setze alle in diese Richtung folgenden Schiffsfelder und damit den Schiffsteil,
+                // der in diese Richtung zeigt auf Status sunk
             }
         }
-        std::cout << std::endl;
         return GuessStatus::sunkShip;
     }
-    // wird das angegebene Feld aufgedeckt, wird dadurch kein Schiff zerstört
+    // wird das angegebene Feld aufgedeckt, wird dadurch kein Schiff komplett zerstört, aber eines getroffen
     guessField[coordinates.x][coordinates.y] = GuessStatus::guessedRight;
     return GuessStatus::guessedRight;
 
 }
 
-// setzt alle Felder in der angegebenem Richtung auf Status sunk bis es auf das Ende des Boards oder ein Feld ohne Schiff stößt
+// setzt alle Felder in angegebener Richtung, auf denen sich ein Schiff befindet,
+// auf Status sunk bis es auf das Ende des Boards erreicht oder auf ein Feld ohne Schiff stößt
 void Board::setShipInThisDirectionSunk(Coordinates coordinates, Direction direction) {
-    Coordinates currentCoordinates = Coordinates(coordinates.x, coordinates.y);
+    coordinates = Coordinates(coordinates.x, coordinates.y);
     while (true) {
-        currentCoordinates = Coordinates::applyDirectionChange(currentCoordinates, direction);
-        if (!GameRule::insideField(currentCoordinates) || !shipField[currentCoordinates.x][currentCoordinates.y]) {
+        coordinates = Coordinates::applyDirectionChange(coordinates, direction);
+        // nächstes Feld in die angegebene Richtung wird gewählt
+        if (!GameRule::insideField(coordinates) || !shipField[coordinates.x][coordinates.y]) {
             return;
+            // befindet sich das behandelte Feld außerhalb des Boards oder befindet sich darauf kein Schiff, wird abgebrochen
         }
-        guessField[currentCoordinates.x][currentCoordinates.y] = GuessStatus::sunkShip;
+        guessField[coordinates.x][coordinates.y] = GuessStatus::sunkShip;
     }
 }
 

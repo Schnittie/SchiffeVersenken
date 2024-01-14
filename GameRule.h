@@ -17,10 +17,9 @@ public:
     // gib true zurück wenn Schiff in Bord platzierbar, sonst false
     static bool shipAddCorrect(int, Coordinates, Direction, std::unique_ptr<Board>);
     static bool shipDestroyed(Coordinates, std::unique_ptr<Board>);
-    static bool insideField(int);
     static bool insideField(Coordinates);
 private:
-    static bool shipInThisDirectionDestroyed(Coordinates, std::unique_ptr<Board>, Direction);
+    static bool shipInThisDirectionUncovered(Coordinates coordinates, std::unique_ptr<Board> board, Direction direction);
 };
 
 
