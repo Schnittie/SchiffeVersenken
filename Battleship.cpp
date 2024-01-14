@@ -2,8 +2,6 @@
 #include "Board.h"
 #include "Opponent.h"
 #include <memory>
-#include <thread>
-#include <chrono>
 
 
 int main() {

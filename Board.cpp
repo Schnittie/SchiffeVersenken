@@ -52,8 +52,9 @@ GuessStatus Board::makeGuess(Coordinates coordinates) {
     if (GameRule::shipDestroyed(coordinates, createCopy())) {
         // wird das angegebene Feld aufgedeckt, wird dadurch ein Schiff komplett zerstört
         guessField[coordinates.x][coordinates.y] = GuessStatus::sunkShip;
+        Coordinates appliedDirectionCoordinates = coordinates;
         for (Direction dir: Coordinates::getListOfAllDirections()) {
-            Coordinates appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, dir);
+            appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, dir);
             //gehe die in alle 4 Richtungen angrenzenden Felder durch
             if (GameRule::insideField(appliedDirectionCoordinates)
                 && shipField[appliedDirectionCoordinates.x][appliedDirectionCoordinates.y]) {
@@ -78,7 +79,7 @@ void Board::setShipInThisDirectionSunk(Coordinates coordinates, Direction direct
     while (true) {
         coordinates = Coordinates::applyDirectionChange(coordinates, direction);
         // nächstes Feld in die angegebene Richtung wird gewählt
-        if (!GameRule::insideField(coordinates) || !shipField[coordinates.x][coordinates.y]) {
+        if (!GameRule::insideField(coordinates) || guessField[coordinates.x][coordinates.y] != GuessStatus::guessedRight) {
             return;
             // befindet sich das behandelte Feld außerhalb des Boards oder befindet sich darauf kein Schiff, wird abgebrochen
         }

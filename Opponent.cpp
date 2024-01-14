@@ -31,6 +31,7 @@ std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
 }
 
 std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hier hab ich nur xPos yPos durch Coords getauscht aber sonst kein refactoring betrieben, weil wir uns diese Methode glaube ich sowieso nochmal anschauen müssen
+    counter++;
     int makeCalculatedGuessNumber = GetRandomNumberBetween(0, 10) + smartness;
 //    Coordinates guessedRightFieldCoordinates = Coordinates(-1, -1);
     std::vector<Coordinates> unGuessedFields;
@@ -44,7 +45,7 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hi
             if (board->guessField[xPos][yPos] == GuessStatus::guessedRight) {
                 // Schiff wurde getroffen, aber noch nicht zerstört
                 Coordinates coordinates = Coordinates(xPos,yPos);
-                int alreadyDiscoveredFieldsOfShip = getNumberOfDiscoveredFieldsOfShip(board->createCopy(), coordinates);
+                int alreadyDiscoveredFieldsOfShip = getNumberOfDiscoveredFieldsOfShip(std::move(board->createCopy()), coordinates);
                 Coordinates appliedDirectionCoordinates = coordinates;
                 for (Direction direction: Coordinates::getListOfAllDirections()) {
                     appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, direction);
@@ -143,7 +144,7 @@ int Opponent::getNumberOfDiscoveredFieldsOfShip(std::unique_ptr<Board> board, Co
             appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, direction);
             if (board->guessField[appliedDirectionCoordinates.x][appliedDirectionCoordinates.y] == GuessStatus::guessedRight
                 || board->guessField[appliedDirectionCoordinates.x][appliedDirectionCoordinates.y] == GuessStatus::sunkShip) {
-                numberOfFields += getNumberOfDiscoveredFieldsOfShipInThisDirection(board->createCopy(), coordinates, direction);
+                numberOfFields += getNumberOfDiscoveredFieldsOfShipInThisDirection(std::move(board->createCopy()), coordinates, direction);
             }
         }
         return numberOfFields;
