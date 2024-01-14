@@ -111,6 +111,17 @@ void Board::printGuessField() {
     std::cout << std::endl;
 }
 
+// gibt den Status des GuessFields eine Position weiter in Richtung der Direction von den Koordinaten aus zurück
+GuessStatus Board::guessStatusOfFieldInDirection(Coordinates coordinates, Direction direction) {
+    return guessField[Coordinates::applyDirectionChange(coordinates, direction).x]
+                        [Coordinates::applyDirectionChange(coordinates, direction).y];
+}
+
+// gibt den Wert des GuessFields an der Stelle von coordinates zurück
+GuessStatus Board::guessFieldStatus(Coordinates coordinates) {
+    return guessField[coordinates.x][coordinates.y];
+}
+
 void Board::printShipField() {
     std::cout << std::endl << "     1  2  3  4  5  6  7  8  9  10    " << std::endl;
     // oberer Rand
@@ -143,4 +154,5 @@ std::unique_ptr<Board> Board::createCopy() {
     }
     return boardCopy;
 }
+
 

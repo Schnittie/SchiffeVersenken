@@ -38,17 +38,12 @@ public:
 
     //Methode bekommt Größe, Ursprungsposition (x und y) und Ausrichtung von Ursprungsposition aus und gibt bool zurück, ob Platzierung geklappt hat
     bool addShip(int, Coordinates, Direction);
-
     GuessStatus makeGuess(Coordinates);
+    GuessStatus guessStatusOfFieldInDirection(Coordinates, Direction);
+    GuessStatus guessFieldStatus(Coordinates);
 
     void printGuessField();
-
     void printShipField();
-
-
-//TODO: was ist ein board?
-//TODO: idee: es gibt drei versionen des Spielbretts, eins auf dem gespeichert ist wo die schiffe sind und eins für jeden Spieler auf dem Treffer und Nieten gespeichert sind
-// Meine Überlegung (Fleischi): würde sagen, man braucht 2, jeder seins, in das man seine Schiffe speichert, man "guessed" dann sozusagen auf dem gegnerischen Board
 };
 
 #endif //SCHIFFEVERSENKEN_PROJEKT__BOARD_H

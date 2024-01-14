@@ -23,6 +23,10 @@ public:
     std::unique_ptr<Board> makeGuess(std::unique_ptr<Board>);
     std::unique_ptr<Board> guessRandom(std::unique_ptr<Board>, std::vector<Coordinates>);
 
+private:
+    int getNumberOfDiscoveredFieldsOfShip(std::unique_ptr<Board>, Coordinates);
+    int getNumberOfDiscoveredFieldsOfShipInThisDirection(std::unique_ptr<Board>, Coordinates, Direction);
+
 //TODO: Was ist ein Opponent?
 // Meine Überlegung (Fleischi): Opponent = das was ein möglicher realer Gegenspieler tun würde
 // -> ist "dumm" und bekommt bei jeder Methode das Board mit rein
