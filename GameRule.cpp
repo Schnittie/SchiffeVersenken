@@ -10,7 +10,7 @@
 
 bool GameRule::shipAddCorrect(int shipSize, Coordinates coordinates, Direction direction, std::unique_ptr<Board> board) {
     if (board->shipsLeftToSet.find(shipSize) == board->shipsLeftToSet.end() ||
-        board->shipsLeftToSet.find(shipSize)->second <= 0 || !insideField(coordinates)) {
+        board->shipsLeftToSet.find(shipSize)->second <= 0 || !insideField(coordinates, board->size)) {
         // es dürfen keine Schiffe dieser Schiffsgröße gesetzt werden (sind entweder alle schon platziert
         // oder diese Schiffsgröße ist generell nicht erlaubt) oder Ursprungspunkt des Schiffs nicht auf dem Feld
         return false;
@@ -18,7 +18,7 @@ bool GameRule::shipAddCorrect(int shipSize, Coordinates coordinates, Direction d
     // testen, ob alle Schiffsfelder innerhalb von Board und nicht neben anderem Schiffsfeld
     int fieldsToSet = shipSize; // shipSize ist am Anfang Größe des zu setzenden Bootes
     while (fieldsToSet > 0) {
-        if (!insideField(coordinates) || board->shipField[coordinates.x][coordinates.y]) {
+        if (!insideField(coordinates, board->size) || board->shipField.at(coordinates.x).at(coordinates.y)) {
             // aktuell zu behandelndes Feld ist nicht innerhalb des Boards (→ Schiff würde nicht komplett im Feld liegen)
             // oder befindet sich an einem Platz, wo bereits ein anderes Schiff ist
             return false;
@@ -26,8 +26,8 @@ bool GameRule::shipAddCorrect(int shipSize, Coordinates coordinates, Direction d
         for (Direction dir: Coordinates::getListOfAllDirections()) {
             Coordinates appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, dir);
             // gehe alle umliegenden Felder durch
-            if (insideField(appliedDirectionCoordinates) &&
-                board->shipField[appliedDirectionCoordinates.x][appliedDirectionCoordinates.y]) {
+            if (insideField(appliedDirectionCoordinates, board->size) &&
+                board->shipField.at(appliedDirectionCoordinates.x).at(appliedDirectionCoordinates.y)) {
                 // auf behandeltem Feld befindet sich ein Schiff
                 // → zu setzendes Schiff würde an einem anderen Schiff anliegen
                 return false;
@@ -44,14 +44,14 @@ bool GameRule::shipAddCorrect(int shipSize, Coordinates coordinates, Direction d
 
 // gebe true zurück, wenn ein Schiff durch Guess des Felds mit den angegebenen Koordinaten zerstört wird, ansonsten false
 bool GameRule::shipDestroyed(Coordinates coordinates, std::unique_ptr<Board> board) {
-    if (insideField(coordinates) && board->shipField[coordinates.x][coordinates.y]) {
+    if (insideField(coordinates, board->size) && board->shipField.at(coordinates.x).at(coordinates.y)) {
         // auf angegebenem Feld befindet sich tatsächlich ein Schiff
         Coordinates appliedDirectionCoordinates = coordinates;
         for (Direction dir: Coordinates::getListOfAllDirections()) {
             appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, dir);
             // gehe alle umliegenden Felder durch
-            if (insideField(appliedDirectionCoordinates)
-                && board->shipField[appliedDirectionCoordinates.x][appliedDirectionCoordinates.y]
+            if (insideField(appliedDirectionCoordinates, board->size)
+                && board->shipField.at(appliedDirectionCoordinates.x).at(appliedDirectionCoordinates.y)
                 && !shipInThisDirectionUncovered(coordinates, std::move(board->createCopy()), dir)) {
                 return false;
                 // wenn sich im behandelten Feld zwar ein Schiff befindet, der Rest des Schiffs in die behandelte
@@ -67,10 +67,10 @@ bool GameRule::shipDestroyed(Coordinates coordinates, std::unique_ptr<Board> boa
 bool GameRule::shipInThisDirectionUncovered(Coordinates coordinates, std::unique_ptr<Board> board,
                                             Direction direction) {
     coordinates = Coordinates::applyDirectionChange(coordinates, direction);
-    while (insideField(coordinates) && board->shipField[coordinates.x][coordinates.y]) {
+    while (insideField(coordinates, board->size) && board->shipField.at(coordinates.x).at(coordinates.y)) {
         // gehe jedes Feld in der angegebenen Richtung durch, bis entweder Feld außerhalb des Feldes gefunden oder es
         // befindet sich kein Schiff darauf → alle zusammenhängenden Schiffsfelder in der Richtung wurden erfolgreich behandelt
-        if (board->guessField[coordinates.x][coordinates.y] != GuessStatus::guessedRight) {
+        if (board->guessField.at(coordinates.x).at(coordinates.y) != GuessStatus::guessedRight) {
             return false;
             // es befindet sich ein Schiff auf dem behandelten Feld (da erster if-Fall nicht eingetroffen),
             // dieses wurde jedoch noch nicht aufgedeckt → das Schiff ist in dieser Richtung noch nicht komplett entdeckt
@@ -81,8 +81,8 @@ bool GameRule::shipInThisDirectionUncovered(Coordinates coordinates, std::unique
 }
 
 // überprüfe, ob sich die gegebenen Koordinaten innerhalb des Boards befinden
-bool GameRule::insideField(Coordinates coordinates) {
-    if (coordinates.x <= 9 && coordinates.x >= 0 && coordinates.y <= 9 && coordinates.y >= 0) {
+bool GameRule::insideField(Coordinates coordinates, int boardSize) {
+    if (coordinates.x < boardSize && coordinates.x >= 0 && coordinates.y < boardSize && coordinates.y >= 0) {
         return true;
     }
     return false;

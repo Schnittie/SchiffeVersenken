@@ -30,11 +30,13 @@ public:
     int totalShipsNotSunk = 0;
     std::map<int, int> shipsLeftToSet;
 
-    bool shipField[10][10]{};
-    GuessStatus guessField[10][10]{};
+    std::vector<std::vector<bool>> shipField;
+    std::vector<std::vector<GuessStatus>> guessField;
+//    bool shipField[10][10]{};
+//    GuessStatus guessField[10][10]{};
 
     Board();
-    Board(int);
+    explicit Board(int);
 
     //Methode bekommt Größe, Ursprungsposition (x und y) und Ausrichtung von Ursprungsposition aus und gibt bool zurück, ob Platzierung geklappt hat
     bool addShip(int, Coordinates, Direction);
