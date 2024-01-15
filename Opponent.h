@@ -16,7 +16,6 @@ public:
     // "Schwierigkeitsscore" (0-10)
     // → legt fest mit welcher Wahrscheinlichkeit die Entscheidungen des computergesteuerten Gegners taktisch gefällt werden
     int smartness = 10;
-    int counter = 0;
 
     // fügt ein neues Schiff in das Board ein und gibt das Board zurück
     std::unique_ptr<Board> addRandomShipOfGivenSize(std::unique_ptr<Board>, int);
