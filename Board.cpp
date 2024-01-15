@@ -6,21 +6,44 @@
 #include "Board.h"
 #include "Coordinates.h"
 
-Board::Board() {
-    // initialisiere beide Felder
+Board::Board(int boardSize) {
     for (int xPos = 0; xPos < 10; xPos++) {
         for (int yPos = 0; yPos < 10; yPos++) {
             shipField[xPos][yPos] = false;
             guessField[xPos][yPos] = GuessStatus::notGuessed;
         }
     }
+    // initialisiere beide Felder
+    size = boardSize;
+    // speichere die Größe des Boards
+    int shipSize = 2;
+    // beginne bei Schiffen mit der Größe 2
+    int neededShipsOfSize = GameRule::getNumberOfShipsOfSizeWhenBoardSize(size, shipSize);
+    // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
+    while(neededShipsOfSize != 0) {
+        shipsLeftToSet.insert(std::make_pair(shipSize, neededShipsOfSize));
+        // inseriere die Anzahl der benötigten Schiffe der Größe in die Map
+        totalShipsNotSunk += neededShipsOfSize;
+        // zähle die Anzahl der Schiffe zu bisherigen Zahl der Schiffe hinzu
+        shipSize++;
+        // gehe zu den nächstgrößeren Schiffen
+        neededShipsOfSize = GameRule::getNumberOfShipsOfSizeWhenBoardSize(size, shipSize);
+        // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
+    }
+    // wiederhole so lange, bis die Schiffsgröße so groß ist, dass kein Schiff der Größe benötigt wird
 }
 
-bool Board::addShip(int size, Coordinates coordinates,
+Board::Board() : Board(10) { /* da default size = 10 */ };
+
+
+
+bool Board::addShip(int shipSize, Coordinates coordinates,
                     Direction direction) { // xPos und yPos sind die Positionen im Array, also 0-9
-    if (GameRule::shipAddCorrect(size, coordinates, direction, createCopy())) {
-        // wenn shipAddCorrect true zurückgibt, dann Platzierung des Schiffs erlaubt → Felder setzen
-        int fieldsLeftToSet = size;
+    if (GameRule::shipAddCorrect(shipSize, coordinates, direction, createCopy())) {
+        // wenn shipAddCorrect true zurückgibt, dann Platzierung des Schiffs erlaubt
+        // → Anzahl zu setzende Schiffe der Größe um eins reduzieren und Felder setzen
+        shipsLeftToSet.find(shipSize)->second = shipsLeftToSet.find(shipSize)->second - 1;
+        int fieldsLeftToSet = shipSize;
         // Anzahl der Felder die noch gesetzt werden müssen
         while (fieldsLeftToSet > 0) {
             // solange noch Felder gesetzt werden müssen

@@ -4,12 +4,15 @@
 
 #include <algorithm>
 #include <iostream>
+#include <cmath>
 #include "GameRule.h"
 
 
 bool GameRule::shipAddCorrect(int shipSize, Coordinates coordinates, Direction direction, std::unique_ptr<Board> board) {
-    if (shipSize > 5 || shipSize < 2 || !insideField(coordinates)) {
-        // angegebene Schiffsgröße nicht im akzeptierten Bereich oder Ursprungspunkt des Schiffs nicht auf dem Feld
+    if (board->shipsLeftToSet.find(shipSize) == board->shipsLeftToSet.end() ||
+        board->shipsLeftToSet.find(shipSize)->second <= 0 || !insideField(coordinates)) {
+        // es dürfen keine Schiffe dieser Schiffsgröße gesetzt werden (sind entweder alle schon platziert
+        // oder diese Schiffsgröße ist generell nicht erlaubt) oder Ursprungspunkt des Schiffs nicht auf dem Feld
         return false;
     }
     // testen, ob alle Schiffsfelder innerhalb von Board und nicht neben anderem Schiffsfeld
@@ -83,4 +86,19 @@ bool GameRule::insideField(Coordinates coordinates) {
         return true;
     }
     return false;
+}
+
+int GameRule::getNumberOfShipsOfSizeWhenBoardSize(int boardSize, int shipSize) {
+    switch (shipSize) {
+        case 2:
+            return round(boardSize * boardSize * 0.04);
+        case 3:
+            return round(boardSize * boardSize * 0.03);
+        case 4:
+            return round(boardSize * boardSize * 0.02);
+        case 5:
+            return round(boardSize * boardSize * 0.01);
+        default:
+            return 0;
+    }
 }

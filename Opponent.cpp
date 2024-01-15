@@ -14,19 +14,27 @@ std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board>
         coordinates = Coordinates(GetRandomNumberBetween(0, 9), GetRandomNumberBetween(0, 9));
         std::vector<Direction> allDirections = Coordinates::getListOfAllDirections();
         direction = allDirections.at(GetRandomNumberBetween(0, allDirections.size()-1));
-    } while (!board->addShip(shipSize, coordinates, direction));
+    } while (!board->addShip(shipSize, coordinates, direction) && board->shipsLeftToSet.find(shipSize)->second > 0);
     // probiert so lange aus ein Schiff der gegebenen Länge an einer zufälligen Koordinate
     // gerichtet in eine zufällige Richtung zu setzen, bis es klappt
     return std::move(board);
 }
 
 std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
-    for (int shipSize = 5; shipSize > 1; shipSize--) {
-        for (int shipNumber = 0; shipNumber < 6 - shipSize; shipNumber++) {
+    int shipSize = 2;
+    while (board->shipsLeftToSet.find(shipSize) != board->shipsLeftToSet.end()) {
+        if (board->shipsLeftToSet.find(shipSize)->second <= 0) {
+            shipSize++;
+        } else {
             board = addRandomShipOfGivenSize(std::move(board), shipSize);
         }
     }
-    // setzt alle zu platzierenden Schiffe zufällig (1 der Göße 5, 2 der Größe 4, 3 der Größe 3, 4 der Größe 2)
+//    for (int shipSize = 5; shipSize > 1; shipSize--) {
+//        for (int shipNumber = 0; shipNumber < 6 - shipSize; shipNumber++) {
+//            board = addRandomShipOfGivenSize(std::move(board), shipSize);
+//        }
+//    }
+    // setzt alle zu platzierenden Schiffe zufällig
     return board;
 }
 
