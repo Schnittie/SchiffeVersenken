@@ -31,7 +31,6 @@ std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
 }
 
 std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hier hab ich nur xPos yPos durch Coords getauscht aber sonst kein refactoring betrieben, weil wir uns diese Methode glaube ich sowieso nochmal anschauen müssen
-    counter++;
     int makeCalculatedGuessNumber = GetRandomNumberBetween(0, 10) + smartness;
 //    Coordinates guessedRightFieldCoordinates = Coordinates(-1, -1);
     std::vector<Coordinates> unGuessedFields;
