@@ -54,7 +54,7 @@ std::string Persistance::turnBoardIntoString(std::unique_ptr<Board> board) {
     }
     boardString.append("\nShipField:\n");
     for (auto &i: board->shipField) {
-        for (bool &j: i) {
+        for (bool j: i) {
             if (j) {
                 boardString.append("0");
             } else {

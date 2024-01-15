@@ -10,23 +10,42 @@ std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board>
     // probiert zufällige Kombinationen aus bis Schiff platzierbar
     Coordinates coordinates = Coordinates(0, 0);
     Direction direction;
+    int maxRepetitionsCounter = 0;
     do {
-        coordinates = Coordinates(GetRandomNumberBetween(0, 9), GetRandomNumberBetween(0, 9));
+        coordinates = Coordinates(GetRandomNumberBetween(0, board->size - 1),
+                                  GetRandomNumberBetween(0, board->size - 1));
         std::vector<Direction> allDirections = Coordinates::getListOfAllDirections();
         direction = allDirections.at(GetRandomNumberBetween(0, allDirections.size()-1));
-    } while (!board->addShip(shipSize, coordinates, direction));
+        maxRepetitionsCounter++;
+        if (maxRepetitionsCounter == 50000) {
+            board->shipsLeftToSet.at(5) = 0;
+            board->shipsLeftToSet.at(4) = 0;
+            board->shipsLeftToSet.at(3) = 0;
+            board->shipsLeftToSet.at(2) = 0;
+        }
+    } while (!board->addShip(shipSize, coordinates, direction) &&
+        board->shipsLeftToSet.find(shipSize) != board->shipsLeftToSet.end() &&
+        board->shipsLeftToSet.find(shipSize)->second > 0 && maxRepetitionsCounter < 50000);
     // probiert so lange aus ein Schiff der gegebenen Länge an einer zufälligen Koordinate
     // gerichtet in eine zufällige Richtung zu setzen, bis es klappt
     return std::move(board);
 }
 
 std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
-    for (int shipSize = 5; shipSize > 1; shipSize--) {
-        for (int shipNumber = 0; shipNumber < 6 - shipSize; shipNumber++) {
+    int shipSize = 2;
+    while (board->shipsLeftToSet.find(shipSize) != board->shipsLeftToSet.end()) {
+        if (board->shipsLeftToSet.find(shipSize)->second <= 0) {
+            shipSize++;
+        } else {
             board = addRandomShipOfGivenSize(std::move(board), shipSize);
         }
     }
-    // setzt alle zu platzierenden Schiffe zufällig (1 der Göße 5, 2 der Größe 4, 3 der Größe 3, 4 der Größe 2)
+//    for (int shipSize = 5; shipSize > 1; shipSize--) {
+//        for (int shipNumber = 0; shipNumber < 6 - shipSize; shipNumber++) {
+//            board = addRandomShipOfGivenSize(std::move(board), shipSize);
+//        }
+//    }
+    // setzt alle zu platzierenden Schiffe zufällig
     return board;
 }
 
@@ -36,31 +55,37 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hi
     std::vector<Coordinates> unGuessedFields;
     std::vector<Coordinates> couldBeShip;
     std::vector<Coordinates> betweenShips;
-    for (int xPos = 0; xPos < 10; xPos++) {
-        for (int yPos = 0; yPos < 10; yPos++) {
-            if (board->guessField[xPos][yPos] == GuessStatus::notGuessed) {
+    for (int xPos = 0; xPos < board->size; xPos++) {
+        for (int yPos = 0; yPos < board->size; yPos++) {
+            if (board->guessField.at(xPos).at(yPos) == GuessStatus::notGuessed) {
                 unGuessedFields.emplace_back(xPos, yPos);
             }
-            if (board->guessField[xPos][yPos] == GuessStatus::guessedRight) {
+            if (board->guessField.at(xPos).at(yPos) == GuessStatus::guessedRight) {
                 // Schiff wurde getroffen, aber noch nicht zerstört
                 Coordinates coordinates = Coordinates(xPos,yPos);
                 int alreadyDiscoveredFieldsOfShip = getNumberOfDiscoveredFieldsOfShip(std::move(board->createCopy()), coordinates);
                 Coordinates appliedDirectionCoordinates = coordinates;
                 for (Direction direction: Coordinates::getListOfAllDirections()) {
                     appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, direction);
-                    if (GameRule::insideField(appliedDirectionCoordinates) &&
+                    if (GameRule::insideField(appliedDirectionCoordinates, board->size) &&
                         board->guessFieldStatus(appliedDirectionCoordinates) == GuessStatus::notGuessed) {
+                        Coordinates coordinatesInOppositeDirection =
+                                Coordinates::applyDirectionChange(coordinates, Coordinates::getOppositeDirection(direction));
+                        Coordinates coordinatesTwoTimesInDirection =
+                                Coordinates::applyDirectionChange(appliedDirectionCoordinates, direction);
                         if (alreadyDiscoveredFieldsOfShip >= 2 &&
-                            board->guessStatusOfFieldInDirection(coordinates, Coordinates::getOppositeDirection(direction))
-                            == GuessStatus::guessedRight) {
-                            if (board->guessStatusOfFieldInDirection(appliedDirectionCoordinates, direction)
-                                == GuessStatus::guessedRight && alreadyDiscoveredFieldsOfShip <= 3) {
+                            GameRule::insideField(coordinatesInOppositeDirection, board->size) &&
+                            board->guessFieldStatus(coordinatesInOppositeDirection) == GuessStatus::guessedRight) {
+                            if (alreadyDiscoveredFieldsOfShip <= 3 &&
+                                GameRule::insideField(coordinatesTwoTimesInDirection, board->size) &&
+                                board->guessFieldStatus(coordinatesTwoTimesInDirection) == GuessStatus::guessedRight) {
                                 betweenShips.push_back(appliedDirectionCoordinates);
                             } else {
                                 couldBeShip.push_back(appliedDirectionCoordinates);
                             }
                         } else if (alreadyDiscoveredFieldsOfShip == 1) {
-                            if (board->guessStatusOfFieldInDirection(appliedDirectionCoordinates, direction) == GuessStatus::guessedRight) {
+                            if (GameRule::insideField(coordinatesTwoTimesInDirection, board->size) &&
+                                board->guessFieldStatus(coordinatesTwoTimesInDirection) == GuessStatus::guessedRight) {
                                 betweenShips.push_back(appliedDirectionCoordinates);
                             } else {
                                 couldBeShip.push_back(appliedDirectionCoordinates);
@@ -135,14 +160,16 @@ std::unique_ptr<Board> Opponent::guessRandom(std::unique_ptr<Board> board, std::
 }
 
 int Opponent::getNumberOfDiscoveredFieldsOfShip(std::unique_ptr<Board> board, Coordinates coordinates) {
-    if (GameRule::insideField(coordinates) && (board->guessField[coordinates.x][coordinates.y] == GuessStatus::guessedRight
-        || board->guessField[coordinates.x][coordinates.y] == GuessStatus::sunkShip)) {
+    if (GameRule::insideField(coordinates, board->size) &&
+        (board->guessField.at(coordinates.x).at(coordinates.y) == GuessStatus::guessedRight ||
+        board->guessField.at(coordinates.x).at(coordinates.y) == GuessStatus::sunkShip)) {
         Coordinates appliedDirectionCoordinates = coordinates;
         int numberOfFields = 1;
         for (Direction direction: Coordinates::getListOfAllDirections()) {
             appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, direction);
-            if (board->guessField[appliedDirectionCoordinates.x][appliedDirectionCoordinates.y] == GuessStatus::guessedRight
-                || board->guessField[appliedDirectionCoordinates.x][appliedDirectionCoordinates.y] == GuessStatus::sunkShip) {
+            if (GameRule::insideField(appliedDirectionCoordinates, board->size) &&
+                (board->guessField.at(appliedDirectionCoordinates.x).at(appliedDirectionCoordinates.y) == GuessStatus::guessedRight
+                || board->guessField.at(appliedDirectionCoordinates.x).at(appliedDirectionCoordinates.y) == GuessStatus::sunkShip)) {
                 numberOfFields += getNumberOfDiscoveredFieldsOfShipInThisDirection(std::move(board->createCopy()), coordinates, direction);
             }
         }
@@ -155,8 +182,9 @@ int Opponent::getNumberOfDiscoveredFieldsOfShip(std::unique_ptr<Board> board, Co
 int Opponent::getNumberOfDiscoveredFieldsOfShipInThisDirection(std::unique_ptr<Board> board, Coordinates coordinates, Direction direction) {
     int numberOfFields = 0;
     coordinates = Coordinates::applyDirectionChange(coordinates, direction);
-    while(GameRule::insideField(coordinates) && (board->guessField[coordinates.x][coordinates.y] == GuessStatus::guessedRight
-                                                 || board->guessField[coordinates.x][coordinates.y] == GuessStatus::sunkShip)) {
+    while(GameRule::insideField(coordinates, board->size) &&
+        (board->guessField.at(coordinates.x).at(coordinates.y) == GuessStatus::guessedRight ||
+        board->guessField.at(coordinates.x).at(coordinates.y) == GuessStatus::sunkShip)) {
         numberOfFields++;
         coordinates = Coordinates::applyDirectionChange(coordinates, direction);
     }
