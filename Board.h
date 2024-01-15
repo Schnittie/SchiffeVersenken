@@ -11,10 +11,6 @@
 #include "GameRule.h"
 #include "Coordinates.h"
 
-class GameRule;
-
-class Coordinates;
-
 enum class GuessStatus {
     notGuessed,
     guessImpossible,
