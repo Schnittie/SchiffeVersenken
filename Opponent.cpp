@@ -50,7 +50,9 @@ std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
     return board;
 }
 
-std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hier hab ich nur xPos yPos durch Coords getauscht aber sonst kein refactoring betrieben, weil wir uns diese Methode glaube ich sowieso nochmal anschauen müssen
+std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board, int smartness) { // hier hab ich nur xPos yPos durch Coords getauscht aber sonst kein refactoring betrieben, weil wir uns diese Methode glaube ich sowieso nochmal anschauen müssen
+    // "Schwierigkeitsscore" (0-10)
+    // → legt fest mit welcher Wahrscheinlichkeit die Entscheidungen des computergesteuerten Gegners taktisch gefällt werden
     int makeCalculatedGuessNumber = GetRandomNumberBetween(0, 10) + smartness;
     std::vector<Coordinates> unGuessedFields;
     std::vector<Coordinates> couldBeShip;
@@ -103,7 +105,19 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hi
             randomFreeField = GetRandomNumberBetween(0, betweenShips.size() - 1);
             coordinates = betweenShips.at(randomFreeField);
             betweenShips.erase(betweenShips.begin() + randomFreeField);
-            if (board->makeGuess(coordinates) != GuessStatus::guessImpossible) {
+            GuessStatus guessResult = board->makeGuess(coordinates);
+            if (guessResult != GuessStatus::guessImpossible) {
+                switch (guessResult) {
+                    case GuessStatus::sunkShip:
+                        std::cout << std::endl << "Der Gegner hat ein Schiff versenkt!" << std::endl;
+                        break;
+                    case GuessStatus::guessedRight:
+                        std::cout << std::endl << "Der Gegner hat ein Schiff getroffen!" << std::endl;
+                        break;
+                    case GuessStatus::guessedWrong:
+                        std::cout << std::endl << "Der Gegner hat nichts getroffen!" << std::endl;
+                        break;
+                }
                 return std::move(board);
             }
         }
@@ -111,7 +125,19 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hi
             randomFreeField = GetRandomNumberBetween(0, couldBeShip.size() - 1);
             coordinates = couldBeShip.at(randomFreeField);
             couldBeShip.erase(couldBeShip.begin() + randomFreeField);
-            if (board->makeGuess(coordinates) != GuessStatus::guessImpossible) {
+            GuessStatus guessResult = board->makeGuess(coordinates);
+            if (guessResult != GuessStatus::guessImpossible) {
+                switch (guessResult) {
+                    case GuessStatus::sunkShip:
+                        std::cout << std::endl << "Der Gegner hat ein Schiff versenkt!" << std::endl;
+                        break;
+                    case GuessStatus::guessedRight:
+                        std::cout << std::endl << "Der Gegner hat ein Schiff getroffen!" << std::endl;
+                        break;
+                    case GuessStatus::guessedWrong:
+                        std::cout << std::endl << "Der Gegner hat nichts getroffen!" << std::endl;
+                        break;
+                }
                 return std::move(board);
             }
         }
@@ -122,7 +148,18 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hi
 
 std::unique_ptr<Board> Opponent::guessRandom(std::unique_ptr<Board> board, std::vector<Coordinates> unGuessedFields) {
     int randomFreeField = GetRandomNumberBetween(0, unGuessedFields.size() - 1);
-    board->makeGuess(unGuessedFields.at(randomFreeField));
+    GuessStatus guessResult = board->makeGuess(unGuessedFields.at(randomFreeField));
+    switch (guessResult) {
+        case GuessStatus::sunkShip:
+            std::cout << std::endl << "Der Gegner hat ein Schiff versenkt!" << std::endl;
+            break;
+        case GuessStatus::guessedRight:
+            std::cout << std::endl << "Der Gegner hat ein Schiff getroffen!" << std::endl;
+            break;
+        case GuessStatus::guessedWrong:
+            std::cout << std::endl << "Der Gegner hat nichts getroffen!" << std::endl;
+            break;
+    }
     return std::move(board);
     // guessed ein zufälliges Feld der gegebenen Liste der noch verdeckten Felder
 }

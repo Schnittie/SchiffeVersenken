@@ -2,23 +2,27 @@
 #include "Board.h"
 #include "Opponent.h"
 #include "Persistance.h"
+#include "GameLoop.h"
 #include <memory>
 
 
 int main() {
-    std::unique_ptr<Board> board = std::make_unique<Board>(20);
-    std::unique_ptr<Opponent> opponent = std::make_unique<Opponent>();
-    board = opponent->placeAllShips(std::move(board));
-    // wichtig! logisch: nicht mehr Guesses als size^2 möglich
-    for (int i = 0; i < 390; i++) {
-        board = opponent->makeGuess(std::move(board));
-    }
-    Persistance::saveGame({(std::move(board->createCopy())), std::move(board->createCopy()), 7});
-    board->printShipField();
-    board->printGuessField();
-    GameState gameState = Persistance::loadGame();
-    gameState.playerBoard->printShipField();
-    gameState.playerBoard->printGuessField();
-    return 0;
+    std::unique_ptr<Board> playerBoard = std::make_unique<Board>(10);
+    std::unique_ptr<Board> opponentBoard = std::make_unique<Board>(10);
+    GameLoop::startGame(std::move(playerBoard), std::move(opponentBoard), 8);
+//    board = gameLoop->requestShipSet(std::move(board));
+//    std::unique_ptr<Opponent> opponent = std::make_unique<Opponent>();
+//    board = opponent->placeAllShips(std::move(board));
+//    // wichtig! logisch: nicht mehr Guesses als size^2 möglich
+//    for (int i = 0; i < 390; i++) {
+//        board = opponent->makeGuess(std::move(board));
+//    }
+//    Persistance::saveGame({(std::move(board->createCopy())), std::move(board->createCopy()), 7});
+//    board->printShipField();
+//    board->printGuessField();
+//    GameState gameState = Persistance::loadGame();
+//    gameState.playerBoard->printShipField();
+//    gameState.playerBoard->printGuessField();
+//    return 0;
 }
 

@@ -29,6 +29,7 @@ public:
     int size;
     int totalShipsNotSunk = 0;
     bool possibleToSetAllShips = true;
+    int guessCounter = 0;
     std::map<int, int> shipsLeftToSet;
 
     std::vector<std::vector<bool>> shipField;

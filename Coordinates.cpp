@@ -2,6 +2,7 @@
 // Created by laure on 11.01.2024.
 //
 
+#include <iostream>
 #include "Coordinates.h"
 
 Coordinates::Coordinates(int xCoordinate, int yCoordinate) : x(xCoordinate), y(yCoordinate) {}
@@ -64,4 +65,20 @@ Direction Coordinates::getOppositeDirection(Direction direction) {
             return Direction::left;
     }
     return Direction::down;
+}
+
+Direction Coordinates::charIntoDirection(char c) {
+    switch (c) {
+        case 'u':
+            return Direction::down;
+        case 'o':
+            return Direction::up;
+        case 'l':
+            return Direction::left;
+        case 'r':
+            return Direction::right;
+        default:
+            std::cout << std::endl << "Dies ist eine ungueltige Eingabe!" << std::endl;
+            return Direction::down;
+    }
 }

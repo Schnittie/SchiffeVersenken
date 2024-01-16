@@ -13,19 +13,15 @@
 class Coordinates;
 class Opponent {
 public:
-    int smartness = 10;
-    // "Schwierigkeitsscore" (0-10)
-    // → legt fest mit welcher Wahrscheinlichkeit die Entscheidungen des computergesteuerten Gegners taktisch gefällt werden
-
     // fügt ein neues Schiff in das Board ein und gibt das Board zurück
-    std::unique_ptr<Board> addRandomShipOfGivenSize(std::unique_ptr<Board>, int);
-    std::unique_ptr<Board> placeAllShips(std::unique_ptr<Board>);
-    std::unique_ptr<Board> makeGuess(std::unique_ptr<Board>);
-    std::unique_ptr<Board> guessRandom(std::unique_ptr<Board>, std::vector<Coordinates>);
+    static std::unique_ptr<Board> addRandomShipOfGivenSize(std::unique_ptr<Board>, int);
+    static std::unique_ptr<Board> placeAllShips(std::unique_ptr<Board>);
+    static std::unique_ptr<Board> makeGuess(std::unique_ptr<Board>, int);
+    static std::unique_ptr<Board> guessRandom(std::unique_ptr<Board>, std::vector<Coordinates>);
 
 private:
-    int getNumberOfDiscoveredFieldsOfShip(std::unique_ptr<Board>, Coordinates);
-    int getNumberOfDiscoveredFieldsOfShipInThisDirection(std::unique_ptr<Board>, Coordinates, Direction);
+    static int getNumberOfDiscoveredFieldsOfShip(std::unique_ptr<Board>, Coordinates);
+    static int getNumberOfDiscoveredFieldsOfShipInThisDirection(std::unique_ptr<Board>, Coordinates, Direction);
 
 //TODO: Was ist ein Opponent?
 // Meine Überlegung (Fleischi): Opponent = das was ein möglicher realer Gegenspieler tun würde

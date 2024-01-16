@@ -123,7 +123,6 @@ GuessStatus Board::makeGuess(Coordinates coordinates) {
         }
         totalShipsNotSunk--;
         if(totalShipsNotSunk <= 0) {
-            std::cout << "!!GEWONNEN!!" << std::endl;
         }
         return GuessStatus::sunkShip;
     }
@@ -208,7 +207,7 @@ void Board::printShipField() {
         // seitlicher Rand
         for (auto &column: shipField) {
             if (column.at(y)) {
-                output += "#  ";
+                output += "@  ";
             } else {
                 output += "~  ";
             }

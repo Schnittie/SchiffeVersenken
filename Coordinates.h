@@ -27,6 +27,7 @@ public:
     static Coordinates applyDirectionChange(Coordinates, Direction);
     static std::vector<Direction> getListOfAllDirections();
     static Direction getOppositeDirection(Direction);
+    static Direction charIntoDirection(char);
 };
 
 
