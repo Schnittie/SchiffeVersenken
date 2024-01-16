@@ -39,6 +39,7 @@ Coordinates Coordinates::applyDirectionChange(Coordinates originalCoordinates, D
         case Direction::right:
             return Coordinates(originalCoordinates.x + 1, originalCoordinates.y);
     }
+    return Coordinates(originalCoordinates.x, originalCoordinates.y + 1);
 }
 
 // gibt alle Richtungen, die man auf dem Board von einem Feld aus gehen kann in einem Vektor zurück
@@ -62,4 +63,5 @@ Direction Coordinates::getOppositeDirection(Direction direction) {
         case Direction::right:
             return Direction::left;
     }
+    return Direction::down;
 }
