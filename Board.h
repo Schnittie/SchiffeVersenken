@@ -23,25 +23,26 @@ enum class GuessStatus {
 
 class Board {
 private:
-    void setShipInThisDirectionSunk(Coordinates, Direction);
+    int setShipInThisDirectionSunk(Coordinates, Direction);
 
 public:
     int size;
     int totalShipsNotSunk = 0;
+    bool possibleToSetAllShips = true;
     std::map<int, int> shipsLeftToSet;
 
     std::vector<std::vector<bool>> shipField;
     std::vector<std::vector<GuessStatus>> guessField;
 //    bool shipField[10][10]{};
 //    GuessStatus guessField[10][10]{};
-
     Board();
     explicit Board(int);
+
+    void reset();
 
     //Methode bekommt Größe, Ursprungsposition (x und y) und Ausrichtung von Ursprungsposition aus und gibt bool zurück, ob Platzierung geklappt hat
     bool addShip(int, Coordinates, Direction);
     GuessStatus makeGuess(Coordinates);
-    GuessStatus guessStatusOfFieldInDirection(Coordinates, Direction);
     GuessStatus guessFieldStatus(Coordinates);
 
     std::unique_ptr<Board> createCopy();
