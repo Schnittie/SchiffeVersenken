@@ -35,7 +35,7 @@ private:
 //TODO: evtl. falls wir den Opponent fancy machen müssten wir noch speichern gegen welche Art von Opponent gespielt wird
 
     static int getIntFromGuessStatus(GuessStatus guessStatus);
-    static void tryCreatingSaveDirecotry();
+    static void tryCreatingSaveDirectory();
     static GameState getGameStateFromFile(std::string filename);
     static GuessStatus getGuessStatusFromChar(char i);
 
