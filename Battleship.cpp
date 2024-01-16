@@ -13,7 +13,7 @@ int main() {
     for (int i = 0; i < 90; i++) {
         board = opponent->makeGuess(std::move(board));
     }
-    Persistance::saveGame({(std::move(board->createCopy())),std::move(board->createCopy()),7});
+    Persistance::saveGame({(std::move(board->createCopy())), std::move(board->createCopy()), 7});
     board->printShipField();
     board->printGuessField();
     GameState gameState = Persistance::loadGame();

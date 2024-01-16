@@ -31,6 +31,8 @@ Persistance::saveGame(GameState gameState) {
     saveGameString.append(turnBoardIntoString(std::move(gameState.opponentBoard->createCopy())));
     saveGameString.append("\nOpponentLevel:\n");
     saveGameString.append(std::to_string(gameState.opponentLevel));
+    saveGameString.append("\nSaveValue:\n");
+    saveGameString.append(Persistance::generateValidationString(saveGameString));
     std::string saveFilename;
     std::string saveDirectoryName = "BattleshipSaves/";
 
@@ -63,6 +65,8 @@ std::string Persistance::turnBoardIntoString(std::unique_ptr<Board> board) {
             }
         }
     }
+    boardString.append("\nShipsNotSunk:\n");
+    boardString.append(std::to_string(board->totalShipsNotSunk));
     return boardString;
 }
 
@@ -145,11 +149,11 @@ GameState Persistance::loadGame() {
     }
     directoryPath.append("/");
     directoryPath.append(filenames.at(userInput - 1));
-    return getGamestateFromFile(directoryPath);
+    return getGameStateFromFile(directoryPath);
 
 }
 
-GameState Persistance::getGamestateFromFile(std::string filename) {
+GameState Persistance::getGameStateFromFile(std::string filename) {
     // Open a file for reading
     std::ifstream inputFile(filename);
 
@@ -165,50 +169,15 @@ GameState Persistance::getGamestateFromFile(std::string filename) {
     }
     // Close the file
     inputFile.close();
-    std::string playerGuessFieldString = lines.at(2);
-    std::string playerShipFieldString = lines.at(4);
-    std::string opponentGuessFieldString = lines.at(7);
-    std::string opponentShipFieldString = lines.at(9);
-    int opponentLevel = std::stoi(lines.at(11));
-    if (playerGuessFieldString.size() != playerShipFieldString.size() || playerGuessFieldString.size() != opponentGuessFieldString.size() ||
-        playerShipFieldString.size() != opponentShipFieldString.size() ||
-        (static_cast<int>(std::sqrt(playerShipFieldString.size()))) * (static_cast<int>(std::sqrt(playerShipFieldString.size()))) !=
-        playerShipFieldString.size()) {
+    if (!Persistance::validateString(lines)) {
         std::cout << "Faulty save file" << std::endl;
         return Persistance::emptyGame();
     }
-    std::vector<std::vector<GuessStatus>> playerGuessField;
-    std::vector<std::vector<bool>> playerShipField;
-    std::vector<std::vector<GuessStatus>> opponentGuessField;
-    std::vector<std::vector<bool>> opponentShipField;
-    int size = static_cast<int>(std::sqrt(playerShipFieldString.size()));
-    // speichere die Größe des Boards
-    for (int xPos = 0; xPos < size; xPos++) {
-        for (int yPos = 0; yPos < size; yPos++) {
-            if (xPos == 0) {
-                std::vector<bool> shipFieldCol;
-                playerShipField.push_back(shipFieldCol);
-                std::vector<GuessStatus> guessFieldCol;
-                playerGuessField.push_back(guessFieldCol);
-                std::vector<bool> opponentShipFieldCol;
-                opponentShipField.push_back(opponentShipFieldCol);
-                std::vector<GuessStatus> opponentGuessFieldCol;
-                opponentGuessField.push_back(opponentGuessFieldCol);
-            }
-            playerShipField.at(xPos).push_back(playerShipFieldString.at(xPos*size+yPos)=='1');
-            playerGuessField.at(xPos).push_back(getGuessStatusFromChar(playerGuessFieldString.at(xPos*size+yPos)));
-            opponentShipField.at(xPos).push_back(opponentShipFieldString.at(xPos*size+yPos)=='1');
-            opponentGuessField.at(xPos).push_back(getGuessStatusFromChar(opponentGuessFieldString.at(xPos*size+yPos)));
-        }
-    }
-    std::unique_ptr<Board> playerBoard = std::make_unique<Board>((static_cast<int>(std::sqrt(playerShipFieldString.size()))));
-    playerBoard->shipField = playerShipField;
-    playerBoard->guessField = playerGuessField;
-    std::unique_ptr<Board> opponentBoard = std::make_unique<Board>((static_cast<int>(std::sqrt(playerShipFieldString.size()))));
-    opponentBoard->shipField = opponentShipField;
-    opponentBoard->guessField = opponentGuessField;
-
-    return GameState({std::move(playerBoard->createCopy()),std::move(opponentBoard->createCopy()),opponentLevel});
+    return GameState({std::move(
+            Persistance::getBoardFromStrings(lines.at(2), lines.at(4), std::stoi(lines.at(6)))->createCopy()),
+                      std::move(Persistance::getBoardFromStrings(lines.at(9), lines.at(11),
+                                                                 std::stoi(lines.at(13)))->createCopy()),
+                      std::stoi(lines.at(15))});
 }
 
 GuessStatus Persistance::getGuessStatusFromChar(char i) {
@@ -224,4 +193,62 @@ GuessStatus Persistance::getGuessStatusFromChar(char i) {
         default:
             return GuessStatus::guessImpossible;
     }
+}
+
+std::unique_ptr<Board> Persistance::getBoardFromStrings(std::string guessFieldString, std::string shipFieldString,
+                                                        int notSunk) {
+    if (guessFieldString.size() != shipFieldString.size() ||
+        (static_cast<int>(std::sqrt(shipFieldString.size()))) *
+        (static_cast<int>(std::sqrt(shipFieldString.size()))) !=
+        shipFieldString.size()) {
+        std::cout << "Faulty save file" << std::endl;
+        return nullptr;
+    }
+    std::vector<std::vector<GuessStatus>> guessField;
+    std::vector<std::vector<bool>> shipField;
+    int size = static_cast<int>(std::sqrt(shipFieldString.size()));
+    for (int xPos = 0; xPos < size; xPos++) {
+        for (int yPos = 0; yPos < size; yPos++) {
+            if (xPos == 0) {
+                std::vector<bool> shipFieldCol;
+                shipField.push_back(shipFieldCol);
+                std::vector<GuessStatus> guessFieldCol;
+                guessField.push_back(guessFieldCol);
+
+            }
+            shipField.at(xPos).push_back(shipFieldString.at(xPos * size + yPos) == '1');
+            guessField.at(xPos).push_back(getGuessStatusFromChar(guessFieldString.at(xPos * size + yPos)));
+
+        }
+    }
+    std::unique_ptr<Board> board = std::make_unique<Board>((static_cast<int>(std::sqrt(shipFieldString.size()))));
+    board->shipField = shipField;
+    board->guessField = guessField;
+    board->size = size;
+    board->totalShipsNotSunk = notSunk;
+    return std::move(board->createCopy());
+}
+
+std::string Persistance::generateValidationString(std::string string) {
+    long sum = 0;
+    for (char c: string) {
+        sum += c;
+    }
+    return std::to_string(sum);
+}
+
+bool Persistance::validateString(std::vector<std::string> lines) {
+    if (lines.size() != 18){
+        return false;
+    }
+    std::string allLines = lines.at(0);
+
+    // Concatenate the rest of the strings except for the last one
+    for (size_t i = 1; i < lines.size() - 1; ++i) {
+        allLines.append("\n");
+        allLines.append(lines.at(i));
+    }
+    allLines.append("\n");
+
+    return Persistance::generateValidationString(allLines) == lines.back();
 }
