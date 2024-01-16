@@ -28,7 +28,7 @@ Board::Board(int boardSize) {
     // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
     while(neededShipsOfSize != 0) {
         shipsLeftToSet.insert(std::make_pair(shipSize, neededShipsOfSize));
-        // inseriere die Anzahl der benötigten Schiffe der Größe in die Map
+        // inseriere die Anzahl der benötigten Schiffe der jeweiligen Größe in die Map
         totalShipsNotSunk += neededShipsOfSize;
         // zähle die Anzahl der Schiffe zu bisherigen Zahl der Schiffe hinzu
         shipSize++;
@@ -41,6 +41,34 @@ Board::Board(int boardSize) {
 
 Board::Board() : Board(10) { /* da default size = 10 */ };
 
+void Board::reset() {
+    // speichere die Größe des Boards
+    for (int xPos = 0; xPos < size; xPos++) {
+        for (int yPos = 0; yPos < size; yPos++) {
+            shipField.at(xPos).at(yPos) = false;
+            guessField.at(xPos).at(yPos) = GuessStatus::notGuessed;
+        }
+    }
+    // initialisiere beide Felder
+    int shipSize = 2;
+    // beginne bei Schiffen mit der Größe 2
+    int neededShipsOfSize = GameRule::getNumberOfShipsOfSizeWhenBoardSize(size, shipSize);
+    // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
+    totalShipsNotSunk = 0;
+    while(neededShipsOfSize != 0) {
+        shipsLeftToSet.find(shipSize)->second = neededShipsOfSize;
+//        shipsNotSunk.insert(std::make_pair(shipSize, neededShipsOfSize));
+        // inseriere die Anzahl der benötigten Schiffe der jeweiligen Größe in die Maps
+        totalShipsNotSunk += neededShipsOfSize;
+        // zähle die Anzahl der Schiffe zu bisherigen Zahl der Schiffe hinzu
+        shipSize++;
+        // gehe zu den nächstgrößeren Schiffen
+        neededShipsOfSize = GameRule::getNumberOfShipsOfSizeWhenBoardSize(size, shipSize);
+        // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
+    }
+    // wiederhole so lange, bis die Schiffsgröße so groß ist, dass kein Schiff der Größe benötigt wird
+    possibleToSetAllShips = true;
+}
 
 
 bool Board::addShip(int shipSize, Coordinates coordinates,
@@ -93,6 +121,10 @@ GuessStatus Board::makeGuess(Coordinates coordinates) {
                 // der in diese Richtung zeigt auf Status sunk
             }
         }
+        totalShipsNotSunk--;
+        if(totalShipsNotSunk <= 0) {
+            std::cout << "!!GEWONNEN!!" << std::endl;
+        }
         return GuessStatus::sunkShip;
     }
     // wird das angegebene Feld aufgedeckt, wird dadurch kein Schiff komplett zerstört, aber eines getroffen
@@ -103,23 +135,19 @@ GuessStatus Board::makeGuess(Coordinates coordinates) {
 
 // setzt alle Felder in angegebener Richtung, auf denen sich ein Schiff befindet,
 // auf Status sunk bis es auf das Ende des Boards erreicht oder auf ein Feld ohne Schiff stößt
-void Board::setShipInThisDirectionSunk(Coordinates coordinates, Direction direction) {
+int Board::setShipInThisDirectionSunk(Coordinates coordinates, Direction direction) {
     coordinates = Coordinates(coordinates.x, coordinates.y);
+    int shipFieldsFound = 0;
     while (true) {
         coordinates = Coordinates::applyDirectionChange(coordinates, direction);
         // nächstes Feld in die angegebene Richtung wird gewählt
         if (!GameRule::insideField(coordinates, size) || guessField.at(coordinates.x).at(coordinates.y) != GuessStatus::guessedRight) {
-            return;
+            return shipFieldsFound;
             // befindet sich das behandelte Feld außerhalb des Boards oder befindet sich darauf kein Schiff, wird abgebrochen
         }
         guessField.at(coordinates.x).at(coordinates.y) = GuessStatus::sunkShip;
+        shipFieldsFound++;
     }
-}
-
-// gibt den Status des GuessFields eine Position weiter in Richtung der Direction von den Koordinaten aus zurück
-GuessStatus Board::guessStatusOfFieldInDirection(Coordinates coordinates, Direction direction) {
-    return guessField.at(Coordinates::applyDirectionChange(coordinates, direction).x)
-    .at(Coordinates::applyDirectionChange(coordinates, direction).y);
 }
 
 // gibt den Wert des GuessFields an der Stelle von coordinates zurück
@@ -211,5 +239,4 @@ std::unique_ptr<Board> Board::createCopy() {
     boardCopy->totalShipsNotSunk = this->totalShipsNotSunk;
     return boardCopy;
 }
-
 

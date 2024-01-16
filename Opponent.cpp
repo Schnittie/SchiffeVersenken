@@ -17,41 +17,41 @@ std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board>
         std::vector<Direction> allDirections = Coordinates::getListOfAllDirections();
         direction = allDirections.at(GetRandomNumberBetween(0, allDirections.size()-1));
         maxRepetitionsCounter++;
-        if (maxRepetitionsCounter == 50000) {
-            board->shipsLeftToSet.at(5) = 0;
-            board->shipsLeftToSet.at(4) = 0;
-            board->shipsLeftToSet.at(3) = 0;
-            board->shipsLeftToSet.at(2) = 0;
+        if (maxRepetitionsCounter == 10000) {
+            board->possibleToSetAllShips = false;
+            // es scheint keine Möglichkeit auf dem Board zu geben, das verbleibende Schiff zu setzen
+            // → breche Platzierungsvorgang ab und markiere die Setzung des nächsten Schiffs als unmöglich
+            // durch Änderung der Variable possibleToSetAllShips im Board auf false
         }
     } while (!board->addShip(shipSize, coordinates, direction) &&
         board->shipsLeftToSet.find(shipSize) != board->shipsLeftToSet.end() &&
-        board->shipsLeftToSet.find(shipSize)->second > 0 && maxRepetitionsCounter < 50000);
+        board->shipsLeftToSet.find(shipSize)->second > 0 && maxRepetitionsCounter < 10000);
     // probiert so lange aus ein Schiff der gegebenen Länge an einer zufälligen Koordinate
     // gerichtet in eine zufällige Richtung zu setzen, bis es klappt
     return std::move(board);
 }
 
 std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
-    int shipSize = 2;
+    int shipSize = 5;
     while (board->shipsLeftToSet.find(shipSize) != board->shipsLeftToSet.end()) {
         if (board->shipsLeftToSet.find(shipSize)->second <= 0) {
-            shipSize++;
+            shipSize--;
         } else {
             board = addRandomShipOfGivenSize(std::move(board), shipSize);
         }
+        if (!board->possibleToSetAllShips) {
+            board->reset();
+            shipSize = 5;
+            // der letzte Platzierungsversuch ist gescheitert, da die Variable auf false gesetzt wurde
+            // → Werte zurücksetzen und nochmal von vorne beginnen
+        }
     }
-//    for (int shipSize = 5; shipSize > 1; shipSize--) {
-//        for (int shipNumber = 0; shipNumber < 6 - shipSize; shipNumber++) {
-//            board = addRandomShipOfGivenSize(std::move(board), shipSize);
-//        }
-//    }
     // setzt alle zu platzierenden Schiffe zufällig
     return board;
 }
 
 std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hier hab ich nur xPos yPos durch Coords getauscht aber sonst kein refactoring betrieben, weil wir uns diese Methode glaube ich sowieso nochmal anschauen müssen
     int makeCalculatedGuessNumber = GetRandomNumberBetween(0, 10) + smartness;
-//    Coordinates guessedRightFieldCoordinates = Coordinates(-1, -1);
     std::vector<Coordinates> unGuessedFields;
     std::vector<Coordinates> couldBeShip;
     std::vector<Coordinates> betweenShips;
@@ -93,8 +93,6 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hi
                         }
                     }
                 }
-                // speichert die Koordinaten an, denen ein Schiff getroffen wurde in die Variablen ab
-//                guessedRightFieldCoordinates = Coordinates(xPos, yPos);
             }
         }
     }
@@ -120,36 +118,6 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board) { // hi
         return guessRandom(std::move(board), unGuessedFields);
     }
     return guessRandom(std::move(board), unGuessedFields);
-//    Coordinates coordinatesNextToGuessedRightField = Coordinates(0,0);
-//    if (guessedRightFieldCoordinates.x != -1 && guessedRightFieldCoordinates.y != -1) {
-//        // wenn ein Feld gefunden wurde, an dem ein Schiff getroffen aber nicht zerstört wurde, wird geschaut,
-//        // welches der umliegenden Felder noch nicht beschossen wurde (es muss zwingend 1 geben)
-//        // → Resultat in Variablen gespeichert
-//        if (guessedRightFieldCoordinates.x + 1 <= 9 &&
-//            board->guessField[guessedRightFieldCoordinates.x][guessedRightFieldCoordinates.y - 1] == GuessStatus::notGuessed) {
-//            coordinatesNextToGuessedRightField.x = guessedRightFieldCoordinates.x + 1;
-//            coordinatesNextToGuessedRightField.y = coordinatesNextToGuessedRightField.y;
-//        } else if (guessedRightFieldCoordinates.x - 1 >= 0 &&
-//                   board->guessField[guessedRightFieldCoordinates.x - 2][guessedRightFieldCoordinates.y - 1] == GuessStatus::notGuessed) {
-//            coordinatesNextToGuessedRightField.x = guessedRightFieldCoordinates.x - 1;
-//            coordinatesNextToGuessedRightField.y = coordinatesNextToGuessedRightField.y;
-//        } else if (coordinatesNextToGuessedRightField.y + 1 <= 9 &&
-//                   board->guessField[guessedRightFieldCoordinates.x - 1][guessedRightFieldCoordinates.y] == GuessStatus::notGuessed) {
-//            coordinatesNextToGuessedRightField.x = guessedRightFieldCoordinates.x;
-//            coordinatesNextToGuessedRightField.y = coordinatesNextToGuessedRightField.y + 1;
-//        } else if (coordinatesNextToGuessedRightField.y - 1 >= 0 &&
-//                   board->guessField[guessedRightFieldCoordinates.x - 1][guessedRightFieldCoordinates.y - 2] == GuessStatus::notGuessed) {
-//            coordinatesNextToGuessedRightField.x = guessedRightFieldCoordinates.x;
-//            coordinatesNextToGuessedRightField.y = coordinatesNextToGuessedRightField.y - 1;
-//        }
-//        if () {
-//            return std::move(board);
-//        } else {
-//            return guessRandom(std::move(board), unGuessedFields);
-//        }
-//    } else {
-//        return guessRandom(std::move(board), unGuessedFields);
-//    }
 }
 
 std::unique_ptr<Board> Opponent::guessRandom(std::unique_ptr<Board> board, std::vector<Coordinates> unGuessedFields) {
