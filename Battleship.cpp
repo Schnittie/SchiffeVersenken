@@ -15,11 +15,9 @@ int main() {
                  "                                                            \n";
     bool quit = false;
     while (!quit) {
-        std::cout << std::endl << "HAPUTMENUE:" << std::endl;
-        std::cout << std::endl << "Ihre Optionen:" << std::endl <<
-            "  (0) Anweisungen und Regeln       (1) neues Spiel starten" << std::endl <<
-            "  (2) gespeichertes Spiel laden    (3) Spielstand loeschen" << std::endl <<
-            "  (4) beenden" << std::endl;
+        // repeat as long as quit is not set to true
+        GameLoop::printMainMenu();
+        // print Main Menu with Options
         std::string input;
         do {
             input.clear();
@@ -28,60 +26,18 @@ int main() {
         if(input == "0") {
             GameLoop::printInstructions();
         } else if(input == "1") {
-            std::cout << std::endl << "Welche Groesse soll das Spielfeld haben? (Erlaubte Groessen:5-30 Normal:10)" << std::endl;
-            int sizeInput = 0;
-            do {
-                if (sizeInput != 0) {
-                    std::cout << "Ungueltige Eingabe" << std::endl;
-                }
-                std::cin >> input;
-                sizeInput = HelpFunctions::stringToInt(input);
-            } while (!(sizeInput <= 30 && sizeInput >= 5));
-                std::cout << std::endl << "Welchen Schwierigkeitsgrad moechten Sie waehlen? (Schwierigkeitsgrade:1-10 10=schwerstes)" << std::endl;
-                int difficultyInput = 0;
-                do {
-                    if (difficultyInput != 0) {
-                        std::cout << "Ungueltige Eingabe" << std::endl;
-                    }
-                    std::cin >> input;
-                    difficultyInput = HelpFunctions::stringToInt(input);
-                } while (!(difficultyInput <= 10 && difficultyInput >= 1));
-                std::unique_ptr<Board> playerBoard = std::make_unique<Board>(sizeInput);
-                std::unique_ptr<Board> opponentBoard = std::make_unique<Board>(sizeInput);
-                std::cout << std::endl << "DAS SPIEL BEGINNT" << std::endl;
-                GameLoop::startGame(std::move(playerBoard), std::move(opponentBoard), difficultyInput);
+            GameLoop::startNewGame();
         } else if(input == "2") {
-            GameState gameState = Persistance::loadGame();
-            if (gameState.playerBoard != nullptr && gameState.opponentBoard != nullptr) {
-                gameState.playerBoard->allShipsAlreadySet();
-                gameState.opponentBoard->allShipsAlreadySet();
-                GameLoop::startGame(std::move(gameState.playerBoard), std::move(gameState.opponentBoard), gameState.opponentLevel);
-            } else {
-                std::cout << std::endl << "Spielstand konnte nicht geladen werden" << std::endl;
-            }
+            GameLoop::tryLoadGame();
         } else if(input == "3") {
             Persistance::deleteSave();
         } else if(input == "4") {
-        quit = true;
+            quit = true;
         } else {
-            std::cout << "Ungueltige Eingabe" << std::endl;
+            GameLoop::invalidInput();
         }
+        // react on player input
     }
-//    std::unique_ptr<Board> playerBoard = std::make_unique<Board>(10);
-//    std::unique_ptr<Board> opponentBoard = std::make_unique<Board>(10);
-//    GameLoop::startGame(std::move(playerBoard), std::move(opponentBoard), 8);
-//    board = gameLoop->requestShipSet(std::move(board));
-//    std::unique_ptr<Opponent> opponent = std::make_unique<Opponent>();
-//    board = opponent->placeAllShips(std::move(board));
-//    // wichtig! logisch: nicht mehr Guesses als size^2 möglich
-//    for (int i = 0; i < 390; i++) {
-//        board = opponent->makeGuess(std::move(board));
-//    }
-//    Persistance::saveGame({(std::move(board->createCopy())), std::move(board->createCopy()), 7});
-//    board->printShipField();
-//    board->printGuessField();
-//    GameState gameState = Persistance::loadGame();
-//    gameState.playerBoard->printShipField();
-//    gameState.playerBoard->printGuessField();
-//    return 0;
+    return 0;
 }
+

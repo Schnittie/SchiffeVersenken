@@ -238,3 +238,48 @@ Coordinates GameLoop::turnStringVectorIntoCoordinates(std::vector<std::string> i
     return Coordinates(xPos, yPos);
 }
 
+void GameLoop::printMainMenu() {
+    std::cout << std::endl << "HAUPTMENUE:" << std::endl;
+    std::cout << std::endl << "Ihre Optionen:" << std::endl <<
+              "  (0) Anweisungen und Regeln       (1) neues Spiel starten" << std::endl <<
+              "  (2) gespeichertes Spiel laden    (3) Spielstand loeschen" << std::endl <<
+              "  (4) beenden" << std::endl;
+}
+
+void GameLoop::startNewGame() {
+    std::string input;
+    std::cout << std::endl << "Welche Groesse soll das Spielfeld haben? (Erlaubte Groessen:5-30 Normal:10)" << std::endl;
+    int sizeInput = 0;
+    do {
+        if (sizeInput != 0) {
+            std::cout << "Ungueltige Eingabe" << std::endl;
+        }
+        std::cin >> input;
+        sizeInput = HelpFunctions::stringToInt(input);
+    } while (!(sizeInput <= 30 && sizeInput >= 5));
+    std::cout << std::endl << "Welchen Schwierigkeitsgrad moechten Sie waehlen? (Schwierigkeitsgrade:1-10 10=schwerstes)" << std::endl;
+    int difficultyInput = 0;
+    do {
+        if (difficultyInput != 0) {
+            std::cout << "Ungueltige Eingabe" << std::endl;
+        }
+        std::cin >> input;
+        difficultyInput = HelpFunctions::stringToInt(input);
+    } while (!(difficultyInput <= 10 && difficultyInput >= 1));
+    std::unique_ptr<Board> playerBoard = std::make_unique<Board>(sizeInput);
+    std::unique_ptr<Board> opponentBoard = std::make_unique<Board>(sizeInput);
+    std::cout << std::endl << "DAS SPIEL BEGINNT" << std::endl;
+    GameLoop::startGame(std::move(playerBoard), std::move(opponentBoard), difficultyInput);
+}
+
+void GameLoop::tryLoadGame() {
+    GameState gameState = Persistance::loadGame();
+    if (gameState.playerBoard != nullptr && gameState.opponentBoard != nullptr) {
+        gameState.playerBoard->allShipsAlreadySet();
+        gameState.opponentBoard->allShipsAlreadySet();
+        GameLoop::startGame(std::move(gameState.playerBoard), std::move(gameState.opponentBoard), gameState.opponentLevel);
+    } else {
+        std::cout << std::endl << "Spielstand konnte nicht geladen werden" << std::endl;
+    }
+}
+
