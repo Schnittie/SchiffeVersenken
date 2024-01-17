@@ -25,7 +25,7 @@ public:
     static GameState loadGame();
 
     static GameState emptyGame();
-
+    static void deleteSave();
 private:
     static void saveString(const std::string &, const std::string &);
 
@@ -34,9 +34,11 @@ private:
 //TODO: Hier kommt das Speichern und laden von Spielständen hin, das einzige was wirklich gespeichert werden muss ist wie das Board aussieht, da immer wenn das Speichern möglich ist sowieso der Spieler dran ist
 //TODO: evtl. falls wir den Opponent fancy machen müssten wir noch speichern gegen welche Art von Opponent gespielt wird
 
+
     static int getIntFromGuessStatus(GuessStatus guessStatus);
     static void tryCreatingSaveDirectory();
     static GameState getGameStateFromFile(std::string filename);
+
     static GuessStatus getGuessStatusFromChar(char i);
 
     static std::unique_ptr<Board> getBoardFromStrings(std::string guessFieldString, std::string shipFieldString, int notSunk);
@@ -44,6 +46,8 @@ private:
     static std::string generateValidationString(std::string string);
 
     static bool validateString(std::vector<std::string> vector1);
+
+    static std::string chooseFile();
 };
 
 

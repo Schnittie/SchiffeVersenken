@@ -9,7 +9,7 @@
 #include <string>
 #include <cmath>
 
-
+std::string errorString = "error";
 void
 Persistance::saveGame(GameState gameState) {
     //Games are converted into a String wich is put into a file
@@ -88,10 +88,21 @@ void Persistance::tryCreatingSaveDirectory() {
     }
 }
 
-/**
- * @return returns a loaded GameState or an Empty GameState in case there are no saves or an error occurs
- */
-GameState Persistance::loadGame() {
+void Persistance::deleteSave(){
+    std::string filePath = Persistance::chooseFile();
+    if (filePath == errorString){
+        return;
+    }
+
+    // Attempt to delete the file
+    if (std::remove(filePath.c_str()) == 0) {
+        std::cout << filePath << " wurde erfolgreich gelöscht" << std::endl;
+    } else {
+        std::cout << filePath << " konnte nicht gelöscht werden" << std::endl;
+    }
+}
+
+std::string Persistance::chooseFile(){
     //if the saves Directory isn't here we creat it
     tryCreatingSaveDirectory();
     std::string directoryPath = "./BattleshipSaves"; // the "." is current directory
@@ -114,7 +125,7 @@ GameState Persistance::loadGame() {
     //there are no save files
     if (numberOfSave == 1) {
         std::cout << "No save file found" << std::endl;
-        return Persistance::emptyGame();
+        return errorString;
     }
 
     int userInput;
@@ -122,13 +133,13 @@ GameState Persistance::loadGame() {
     while (!validInput) {
         userInput = -1;
         std::cin.sync();
-        std::cout << "Choose a save: ";
+        std::cout << "Choose a save by inputting the number: ";
 
         // Try to get an integer from the user
         if (std::cin >> userInput) {
             if (userInput == 0){
-                std::cout << "Cancelled loading save" << std::endl;
-                return Persistance::emptyGame();
+                std::cout << "Cancelled" << std::endl;
+                return errorString;
             }
             if (userInput <= numberOfSave - 1 && userInput > 0) {
                 validInput = true;
@@ -144,9 +155,18 @@ GameState Persistance::loadGame() {
     //we add the chosen file to the path
     directoryPath.append("/");
     directoryPath.append(filenames.at(userInput - 1));
+    return directoryPath;
+}
 
-    return getGameStateFromFile(directoryPath);
-
+/**
+ * @return returns a loaded GameState or an Empty GameState in case there are no saves or an error occurs
+ */
+GameState Persistance::loadGame() {
+    std::string savePath = Persistance::chooseFile();
+    if (savePath == errorString){
+        return Persistance::emptyGame();
+    }
+    return getGameStateFromFile(savePath);
 }
 
 GameState Persistance::getGameStateFromFile(std::string filename) {
