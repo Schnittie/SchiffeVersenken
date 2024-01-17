@@ -39,3 +39,7 @@ bool HelpFunctions::valuesOfShipsLeftToSetAreZero(std::unique_ptr<Board> board) 
         + board->shipsLeftToSet.find(4)->second
         + board->shipsLeftToSet.find(5)->second <= 0;
 }
+
+bool HelpFunctions::vectorHasOneValueWithOneChar(std::vector<std::string> vector) {
+    return vector.size() == 1 && vector.at(0).size() == 1;
+}

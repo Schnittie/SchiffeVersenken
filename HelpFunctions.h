@@ -16,6 +16,7 @@ public:
     static int stringToInt(const std::string&);
     static std::vector<std::string> readCInIntoVector();
     static bool valuesOfShipsLeftToSetAreZero(std::unique_ptr<Board>);
+    static bool vectorHasOneValueWithOneChar(std::vector<std::string>);
 };
 
 #endif //SCHIFFEVERSENKEN_PROJEKT__HELPFUNCTIONS_H

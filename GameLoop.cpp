@@ -10,46 +10,63 @@
 #include "HelpFunctions.h"
 
 void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Board> opponentBoard, int difficulty) {
-    bool quitGame = false;
+    bool quitRound = false;
     if (!HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(opponentBoard->createCopy()))) {
         opponentBoard = Opponent::placeAllShips(std::move(opponentBoard));
         std::cout << std::endl << "Der Gegner hat alle seine Schiffe gesetzt.";
     }
+    // der Gegner setzt den Rest seiner Schiffe, falls sie noch nicht gesetzt sind
     std::cout << std::endl << std::endl << "Ihr Feld:";
     playerBoard->printShipField();
+    // das Feld des Spielers wird zu Orientierung ausgegeben
     std::vector<std::string> inputsVector;
     playerBoard = tryToRequestAllShipsSet(std::move(playerBoard));
+    // man versucht alle Schiffe vom Spieler gesetzt zu bekommen
     if (HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(playerBoard->createCopy()))) {
         std::cout << std::endl << "Nun geht es ans Felder aufdecken!" << std::endl;
     } else {
-        quitGame = true;
+        quitRound = true;
     }
-    while (playerBoard->totalShipsNotSunk > 0 && opponentBoard->totalShipsNotSunk > 0 && !quitGame) {
+    // wenn nicht alle Schiffe gesetzt wurden, heißt das, dass der Spieler zu Hauptmenü möchte
+    while (playerBoard->totalShipsNotSunk > 0 && opponentBoard->totalShipsNotSunk > 0 && !quitRound) {
+        // wiederhole so lange, bis alle Schiffe eines zerstört wurden, oder der Spieler die Runde verlassen möchte
         int numberOfGuessesBefore;
         do {
             numberOfGuessesBefore = opponentBoard->guessCounter;
+            // speichere die Nummer der Guesses der Spieler zwischen um nach Rückerhalt des Boards
+            // nachvollziehen zu können, ob der Spieler erfolgreich getippt hat und um insgesamt die Anzahl der guesses
+            // speichern zu können
             requestNewGuess(std::move(opponentBoard->createCopy()));
+            // fordere einen neuen Rate-Versuch des Spielers an
             do {
                 inputsVector = HelpFunctions::readCInIntoVector();
             } while (inputsVector.empty());
-            if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '0') {
+            // warte, bis der Spieler eine Eingabe gemacht und nicht nur eine neue Zeile angefangen hat
+            if (HelpFunctions::vectorHasOneValueWithOneChar(inputsVector) && inputsVector.at(0).at(0) == '0') {
                 printInstructions();
-            } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '1') {
+            } else if (HelpFunctions::vectorHasOneValueWithOneChar(inputsVector) && inputsVector.at(0).at(0) == '1') {
                 std::cout << "Das ist die Platzierung Ihrer Schiffe:";
                 playerBoard->printShipField();
-            } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '2') {
-                quitGame = true;
-            } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '3') {
+            } else if (HelpFunctions::vectorHasOneValueWithOneChar(inputsVector) && inputsVector.at(0).at(0) == '2') {
+                quitRound = true;
+            } else if (HelpFunctions::vectorHasOneValueWithOneChar(inputsVector) && inputsVector.at(0).at(0) == '3') {
                 Persistance::saveGame({(std::move(playerBoard->createCopy())),
                                        std::move(opponentBoard->createCopy()), 7});
             } else {
                 opponentBoard = interpretGuess(std::move(opponentBoard), inputsVector);
             }
-        } while (opponentBoard->guessCounter == numberOfGuessesBefore && !quitGame);
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        if (opponentBoard->totalShipsNotSunk > 0 && !quitGame) {
+            // wenn nur ein Zeichen eingegeben wurde und dieses einer Aktion zugewiesen ist, führe diese Aktion durch,
+            // ansonsten versuche die Eingabe als Rate-Versuch zu interpretieren
+        } while (opponentBoard->guessCounter == numberOfGuessesBefore && !quitRound);
+        // wiederhole so lange, bis ein Rate-Versuch des Spielers gültig war oder der Spieler das Spiel verlassen möchte
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        // halte den Thread kurz an, damit der Spieler erkennen kann, ob sein Rate-Versuch erfolgreich war
+        if (opponentBoard->totalShipsNotSunk > 0 && !quitRound) {
             playerBoard = letOpponentGuess(std::move(playerBoard), difficulty);
+            playerBoard->guessCounter++;
         }
+        // wenn der Spieler noch nicht alle Schiffe des Gegners zerstört hat und nicht die Runde verlassen möchte,
+        // macht der Opponent einen Rate-Versuch
     }
     if (playerBoard->totalShipsNotSunk <= 0) {
         std::cout << std::endl << "Der Gegner hat alle Ihre Schiffe zerstoert und dadurch gewonnen!!!" << std::endl <<
@@ -60,6 +77,8 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
         std::cout << std::endl << "Sie haben alle Schiffe des Gegners zerstoert und dadurch gewonnen!!! Glueckwunsch!!!" << std::endl <<
                                "Sie haben dafuer " << opponentBoard->guessCounter << " mal tippen müssen!" << std::endl;
     }
+    // wenn die Schleife für die Rate-Versuche verlassen wurde und dabei ein Spieler alle Schiffe des Gegners zerstört
+    // hat, wird eine Nachricht für das Gewinnen/Verlieren ausgegeben
 }
 
 void GameLoop::requestNewShipField(std::unique_ptr<Board> playerBoard) {
@@ -79,71 +98,79 @@ int GameLoop::getSizeOfBiggestShipLeftToSet(std::unique_ptr<Board> board) {
         }
     }
     return sizeOfBiggestShipLeftToSet;
+    // gehe die Werte von shipsLeftToSet anfangend vom größten durch und gebe die Schiffsgröße zurück,
+    // bei der zuerst noch ein Schiff zu setze ist
 }
 
 std::unique_ptr<Board> GameLoop::tryToRequestAllShipsSet(std::unique_ptr<Board> board) {
-    bool quitGame = false;
+    bool quitRound = false;
     std::vector<std::string> inputsVector;
-    while (!HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(board->createCopy())) && !quitGame) {
+    while (!HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(board->createCopy())) && !quitRound) {
         // wiederhole so lange, bis entweder von allen Schiffsgrößen in ShipsLeftToSet im Board keine mehr gesetzt werden
-        // müssen oder quitGame auf true gesetzt wurde
+        // müssen oder quitRound auf true gesetzt wurde
         requestNewShipField(std::move(board->createCopy()));
         // fordert den Spieler an, "Koordinaten" einzugeben, für das Feld, von dem ausgehend er das Schiff setzen möchte
         do {
             inputsVector = HelpFunctions::readCInIntoVector();
         } while (inputsVector.empty());
         // warte, bis der Spieler eine Eingabe gemacht und nicht nur eine neue Zeile angefangen hat
-        if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1) {
+        if (HelpFunctions::vectorHasOneValueWithOneChar(inputsVector)) {
             if (inputsVector.at(0).at(0) == '0') {
                 printInstructions();
+                inputsVector.clear();
             } else if (inputsVector.at(0).at(0) == '1') {
-                quitGame = true;
+                quitRound = true;
             } else if (inputsVector.at(0).at(0) == '2') {
                 board = Opponent::placeAllShips(std::move(board));
             } else {
-                board = requestShipSet(std::move(board), inputsVector,
-                                       getSizeOfBiggestShipLeftToSet(std::move(board->createCopy())));
+                invalidInput();
             }
             // wenn nur ein Zeichen eingegeben wurde und dieses entweder 1, 2 oder 3 ist, dann führe die entsprechende Funktion aus,
-            // wenn nicht, dann führe requestShipSet aus, versuche also für die gegebenen Eingabe ein Schiff zu setzen
+            // wenn dieses Zeichen nichts davon ist, dann ist dies eine invalide Eingabe
         } else {
-            board = requestShipSet(std::move(board), inputsVector,
-                                   getSizeOfBiggestShipLeftToSet(std::move(board->createCopy())));
+            Coordinates coordinates = turnStringVectorIntoCoordinates(inputsVector);
+            if (inputsVector.size() != 2 || !GameRule::insideField(coordinates, board->size)) {
+                inputsVector.clear();
+                // wenn die Anzahl der Inputs nicht 2 ist oder die Koordinaten, die auf Basis des Inputs generiert wurden
+                // nicht im Feld liegen, dann ist dies eine invalide Eingabe
+            } else {
+                board = requestShipDirectionAndTrySet(std::move(board), coordinates,
+                                                      getSizeOfBiggestShipLeftToSet(std::move(board->createCopy())));
+            }
+            // wenn nicht, dann führe requestShipDirectionAndTrySet aus, versuche also mit den gegebenen Eingaben nach dem Erfragen
+            // der Richtung, in die das Schiff gerichtet sein soll ein Schiff zu setzen
         }
     }
     return std::move(board);
 }
 
-std::unique_ptr<Board> GameLoop::requestShipSet(std::unique_ptr<Board> playerBoard, std::vector<std::string> inputsVector,
-                                                int sizeOfBiggestShipLeftToSet) {
-    if (inputsVector.size() != 2) {
-        invalidInput();
-        return std::move(playerBoard);
-    }
-    Coordinates coordinates = turnStringVectorIntoCoordinates(inputsVector);
-    if (!GameRule::insideField(coordinates, playerBoard->size)) {
-        invalidInput();
-        return std::move(playerBoard);
-    }
+std::unique_ptr<Board> GameLoop::requestShipDirectionAndTrySet(std::unique_ptr<Board> playerBoard, Coordinates coordinates,
+                                                               int sizeOfBiggestShipLeftToSet) {
     std::cout << "Bitte geben Sie die Richtung, in die das Schiff gerichtet sein soll, an! ('o'^|'u'v|'l'<|'r'>)" << std::endl;
     std::string input;
     do {
         std::cin >> input;
     } while (input.empty());
-    if (input.length() == 0 || !(input.at(0) == 'l' || input.at(0) == 'r' || input.at(0) == 'o' || input.at(0) == 'u')) {
+    // warte, bis der Spieler eine Eingabe gemacht und nicht nur eine neue Zeile angefangen hat
+    if (input.length() != 1 || !(input.at(0) == 'l' || input.at(0) == 'r' || input.at(0) == 'o'
+                            || input.at(0) == 'u' || input.at(0) == '0')) {
         invalidInput();
         return std::move(playerBoard);
     }
-    if (input.length() == 1 && input.at(0) == '0') {
+    // wenn entweder nicht genau ein Zeichen eingegeben wurde oder die Eingabe nicht eines der erwarteten Zeichen ist,
+    // ist das ein invalide Eingabe
+    if (input.at(0) == '0') {
         printInstructions();
         return std::move(playerBoard);
-    }
+    } // wenn die Eingabe '0' ist, dann gebe die Anweisungen und Regeln aus und beende den Vorgang
     if (!playerBoard->addShip(sizeOfBiggestShipLeftToSet, coordinates, Coordinates::charIntoDirection(input.at(0)))) {
         invalidInput();
         return std::move(playerBoard);
-    }
+    } // wenn das Hinzufügen des Schiffes nicht erfolgreich war, dann war das ein invalide Eingabe
     playerBoard->printShipField();
     return std::move(playerBoard);
+    // wenn alles korrekt war, gebe das Board mit dem neuen Schiff aus und beende die Funktion
+    // (Das Schiff wurde durch playerBoard->addShip(...) hinzugefügt, da dieses ja nicht fehlgeschlagen ist)
 }
 
 void GameLoop::requestNewGuess(std::unique_ptr<Board> opponentBoard) {
@@ -155,17 +182,17 @@ void GameLoop::requestNewGuess(std::unique_ptr<Board> opponentBoard) {
     std::cout << std::endl << "  (2) Spiel abbrechen und zurueck zum Hauptmenue   (3) Spiel speichern )" << std::endl;
 }
 
-std::unique_ptr<Board> GameLoop::interpretGuess(std::unique_ptr<Board> opponentBoard, std::vector<std::string> inputsVector) {
-    if (inputsVector.size() != 2) {
-        invalidInput();
-        return std::move(opponentBoard);
-    }
+std::unique_ptr<Board> GameLoop::interpretGuess(std::unique_ptr<Board> opponentBoard, const std::vector<std::string>& inputsVector) {
+    // der inputs vector enthält die einzelnen Eingaben des Spielers an den Leerzeichen getrennt
     Coordinates coordinates = turnStringVectorIntoCoordinates(inputsVector);
-    if (!GameRule::insideField(coordinates, opponentBoard->size)) {
+    if (inputsVector.size() != 2 || !GameRule::insideField(coordinates, opponentBoard->size)) {
         invalidInput();
         return std::move(opponentBoard);
+        // wenn entweder nicht genau zwei Zeichenketten eingegeben wurden oder sich die Koordinaten, die auf Basis der
+        // Zeichenketten erstellt wurden, nicht im Spielfeld befinden, dann war das ein invalide Eingabe
     }
     GuessStatus guessResult = opponentBoard->makeGuess(coordinates);
+    // versuche den Guess auf das Board anzuwenden
     switch (guessResult) {
         case GuessStatus::sunkShip:
             std::cout << std::endl << "Sie haben ein Schiff versenkt!" << std::endl;
@@ -180,10 +207,14 @@ std::unique_ptr<Board> GameLoop::interpretGuess(std::unique_ptr<Board> opponentB
             invalidInput();
             return std::move(opponentBoard);
     }
+    // eine Nachricht wird je nach Treffer/nicht-Treffer ausgegeben, oder, falls der Guess ungültig war
+    // (z.B. weil dieses Feld schon guessed wurde), dann war das ein invalide Eingabe
     opponentBoard->guessCounter++;
+    // sonst war der Guess erfolgreich → der GuessCounter wird erhöht
     std::cout << std::endl << "Ihr bisheriger Fortschritt:";
     opponentBoard->printGuessField();
     std::cout << "Um zu gewinnen muessen Sie noch " << opponentBoard->totalShipsNotSunk << " Schiffe versenken!" << std::endl;
+    // dem Spieler werden Informationen über seinen Spielfortschritt ausgegeben
     return std::move(opponentBoard);
 }
 
@@ -193,6 +224,7 @@ std::unique_ptr<Board> GameLoop::letOpponentGuess(std::unique_ptr<Board> playerB
     playerBoard->printGuessField();
     std::cout << "Der Gegner muss noch " << playerBoard->totalShipsNotSunk << " Schiffe versenken, um zu gewinnen." << std::endl;
     return std::move(playerBoard);
+    // der Gegner macht einen Guess und das Resultat dessen wird dem Spieler angezeigt
 }
 
 void GameLoop::printInstructions() {
@@ -236,10 +268,11 @@ void GameLoop::invalidInput() {
 Coordinates GameLoop::turnStringVectorIntoCoordinates(std::vector<std::string> inputsVector) {
     if (inputsVector.size() != 2) {
         invalidInput();
-        return Coordinates(0, 0);
+        return {-1, -1};
+        // Es wird ein Vektor mit zwei Werten erwartet → alles andere ist eine ungültige Eingabe → Rückgabe ungültiger Koordinaten
     }
     int xPos = 0;
-    int yPos = 0;
+    int yPos;
     if (inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) >= 65) {
         yPos = static_cast<int>(inputsVector.at(0).at(0)) - 65;
         for (char digit: inputsVector.at(1)) {
@@ -254,9 +287,15 @@ Coordinates GameLoop::turnStringVectorIntoCoordinates(std::vector<std::string> i
         xPos--;
     } else {
         invalidInput();
-        return Coordinates(0, 0);
+        return {-1, -1};
     }
-    return Coordinates(xPos, yPos);
+    // einer der Werte muss ein einzelnes Zeichen sein mit einem Ascii-Code >= 65 (es handelt sich um die y-Koordinate,
+    // die als Buchstabe erwartet wird), wenn dies nicht so ist, dann ist das eine invalide Eingabe
+    // der zuvor benannte Wert wird zu einer Zahl umgewandelt und -65 gerechnet, um einen Wert von 0-30 zu bekommen
+    // (A=0, B=1, ...) und wird dann als yPos interpretiert, beim anderen wird der Zwischenwert von xPos so lage *10
+    // gerechnet und die nächste Ziffer in eine int gecastet - 48 gerechnet und aufaddiert, bis alle Ziffern durch sind
+    // (Ascii-Code von 1=48, 2=49, ...) → der Wert wird vom String in eine Int umgewandelt
+    return {xPos, yPos};
 }
 
 void GameLoop::printMainMenu() {
@@ -273,24 +312,33 @@ void GameLoop::startNewGame() {
     int sizeInput = 0;
     do {
         if (sizeInput != 0) {
-            std::cout << "Ungueltige Eingabe" << std::endl;
+            invalidInput();
+            std::cout << "Bitte versuchen Sie es erneut:" << std::endl;
+            // Eingabe hat nicht den erwarteten Werten genügt → Fehlermeldung
         }
         std::cin >> input;
         sizeInput = HelpFunctions::stringToInt(input);
+        // wandelt den String in einen int um
     } while (!(sizeInput <= 30 && sizeInput >= 5));
+    // wiederhole so lange, bis eine valide Eingabe erfolgt
     std::cout << std::endl << "Welchen Schwierigkeitsgrad moechten Sie waehlen? (Schwierigkeitsgrade:1-10 10=schwerstes)" << std::endl;
     int difficultyInput = 0;
     do {
         if (difficultyInput != 0) {
-            std::cout << "Ungueltige Eingabe" << std::endl;
+            invalidInput();
+            std::cout << "Bitte versuchen Sie es erneut:" << std::endl;
+            // Eingabe hat nicht den erwarteten Werten genügt → Fehlermeldung
         }
         std::cin >> input;
         difficultyInput = HelpFunctions::stringToInt(input);
+        // wandelt den String in einen int um
     } while (!(difficultyInput <= 10 && difficultyInput >= 1));
+    // wiederhole so lange, bis eine valide Eingabe erfolgt
     std::unique_ptr<Board> playerBoard = std::make_unique<Board>(sizeInput);
     std::unique_ptr<Board> opponentBoard = std::make_unique<Board>(sizeInput);
     std::cout << std::endl << "DAS SPIEL BEGINNT" << std::endl;
     GameLoop::startGame(std::move(playerBoard), std::move(opponentBoard), difficultyInput);
+    // erstellt die entsprechenden Boards und startet das Spiel
 }
 
 void GameLoop::tryLoadGame() {
@@ -299,6 +347,8 @@ void GameLoop::tryLoadGame() {
         gameState.playerBoard->allShipsAlreadySet();
         gameState.opponentBoard->allShipsAlreadySet();
         GameLoop::startGame(std::move(gameState.playerBoard), std::move(gameState.opponentBoard), gameState.opponentLevel);
+        // wenn das Laden des Spiels erfolgreich war und beide Boards im gameState Objekt vorhanden sind,
+        // wird das Spiel mit dem geladenen Spielstand gestartet
     } else {
         std::cout << std::endl << "Spielstand konnte nicht geladen werden" << std::endl;
     }
