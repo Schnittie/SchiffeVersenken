@@ -13,14 +13,14 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
     bool quitGame = false;
     if (!HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(opponentBoard->createCopy()))) {
         opponentBoard = Opponent::placeAllShips(std::move(opponentBoard));
-        std::cout << std::endl << "Der Gegner hat alle seine Schiffe gesetzt.";
+        std::cout << std::endl << "The opponent has placed their ships.";
     }
-    std::cout << std::endl << std::endl << "Ihr Feld:";
+    std::cout << std::endl << std::endl << "Your field:";
     playerBoard->printShipField();
     std::vector<std::string> inputsVector;
     playerBoard = tryToRequestAllShipsSet(std::move(playerBoard));
     if (HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(playerBoard->createCopy()))) {
-        std::cout << std::endl << "Nun geht es ans Felder aufdecken!" << std::endl;
+        std::cout << std::endl << "Now it's time to make guesses!" << std::endl;
     } else {
         quitGame = true;
     }
@@ -35,7 +35,7 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
             if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '0') {
                 printInstructions();
             } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '1') {
-                std::cout << "Das ist die Platzierung Ihrer Schiffe:";
+                std::cout << "This is the placement of your ships:";
                 playerBoard->printShipField();
             } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '2') {
                 quitGame = true;
@@ -52,22 +52,22 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
         }
     }
     if (playerBoard->totalShipsNotSunk <= 0) {
-        std::cout << std::endl << "Der Gegner hat alle Ihre Schiffe zerstoert und dadurch gewonnen!!!" << std::endl <<
-            "Er hat dafuer " << playerBoard->guessCounter << " mal tippen muessen!" << std::endl << std::endl<<
-            "Das gegnerische Schlachtfeld waere gewesen:";
+        std::cout << std::endl << "The enemy has destroyed all your ships and has thereby won the game!!!" << std::endl <<
+            "It took them " << playerBoard->guessCounter << " guesses!" << std::endl << std::endl<<
+            "The opponents ship placement would have been:";
             opponentBoard->printShipField();
     } else if (opponentBoard->totalShipsNotSunk <= 0) {
-        std::cout << std::endl << "Sie haben alle Schiffe des Gegners zerstoert und dadurch gewonnen!!! Glueckwunsch!!!" << std::endl <<
-                               "Sie haben dafuer " << opponentBoard->guessCounter << " mal tippen müssen!" << std::endl;
+        std::cout << std::endl << "You have destroyed all your opponents ships and thereby won the game!!! Congratulations!!!" << std::endl <<
+                               "It took you " << opponentBoard->guessCounter << " guesses!" << std::endl;
     }
 }
 
 void GameLoop::requestNewShipField(std::unique_ptr<Board> playerBoard) {
-    std::cout << "Sie setzen als naechstes ein Schiff der Groesse " <<
+    std::cout << "Please place a ship of the size " <<
     getSizeOfBiggestShipLeftToSet(std::move(playerBoard->createCopy())) << ".";
-    std::cout << std::endl << "Bitte geben Sie die Werte des Ausgangsfelds durch ein Leerzeichen getrennt an!";
-    std::cout << std::endl << "( (0) Anweisungen und Regeln    (1) Spiel abbrechen und zurueck zum Hauptmenue";
-    std::cout << std::endl << "  (2) restliche Schiffe zufaellig setzen )" << std::endl;
+    std::cout << std::endl << "Please separate your input by spaces!";
+    std::cout << std::endl << "( (0) Tutorial and rules    (1) Cancel game and return to main menu";
+    std::cout << std::endl << "  (2) place all other ships randomly )" << std::endl;
 }
 
 int GameLoop::getSizeOfBiggestShipLeftToSet(std::unique_ptr<Board> board) {
@@ -125,7 +125,7 @@ std::unique_ptr<Board> GameLoop::requestShipSet(std::unique_ptr<Board> playerBoa
         invalidInput();
         return std::move(playerBoard);
     }
-    std::cout << "Bitte geben Sie die Richtung, in die das Schiff gerichtet sein soll, an! ('o'^|'u'v|'l'<|'r'>)" << std::endl;
+    std::cout << "Please input the direction the ship should be facing! ('o'^|'u'v|'l'<|'r'>)" << std::endl;
     std::string input;
     do {
         std::cin >> input;
@@ -147,12 +147,12 @@ std::unique_ptr<Board> GameLoop::requestShipSet(std::unique_ptr<Board> playerBoa
 }
 
 void GameLoop::requestNewGuess(std::unique_ptr<Board> opponentBoard) {
-    std::cout << "Ihr bisheriges Resultat:";
+    std::cout << "Your results up to this point:";
     opponentBoard->printGuessField();
-    std::cout << "Sie duerfen auf ein Feld tippen.";
-    std::cout << std::endl << "Bitte geben Sie die Werte des Felds durch ein Leerzeichen getrennt an!";
-    std::cout << std::endl << "( (0) Anweisungen und Regeln   (1) Mein Schiffsfeld";
-    std::cout << std::endl << "  (2) Spiel abbrechen und zurueck zum Hauptmenue   (3) Spiel speichern )" << std::endl;
+    std::cout << "You may guess a field.";
+    std::cout << std::endl << "Please separate your input by spaces!";
+    std::cout << std::endl << "( (0) Tutorial and rules   (1) My shipfield";
+    std::cout << std::endl << "  (2) Cancel game and return to main menu   (3) Save game )" << std::endl;
 }
 
 std::unique_ptr<Board> GameLoop::interpretGuess(std::unique_ptr<Board> opponentBoard, std::vector<std::string> inputsVector) {
@@ -168,30 +168,30 @@ std::unique_ptr<Board> GameLoop::interpretGuess(std::unique_ptr<Board> opponentB
     GuessStatus guessResult = opponentBoard->makeGuess(coordinates);
     switch (guessResult) {
         case GuessStatus::sunkShip:
-            std::cout << std::endl << "Sie haben ein Schiff versenkt!" << std::endl;
+            std::cout << std::endl << "You sunk a ship!" << std::endl;
             break;
         case GuessStatus::guessedRight:
-            std::cout << std::endl << "Sie haben ein Schiff getroffen!" << std::endl;
+            std::cout << std::endl << "You hit a ship!" << std::endl;
             break;
         case GuessStatus::guessedWrong:
-            std::cout << std::endl << "Sie haben nichts getroffen!" << std::endl;
+            std::cout << std::endl << "You missed!" << std::endl;
             break;
         default:
             invalidInput();
             return std::move(opponentBoard);
     }
     opponentBoard->guessCounter++;
-    std::cout << std::endl << "Ihr bisheriger Fortschritt:";
+    std::cout << std::endl << "Your progress so far:";
     opponentBoard->printGuessField();
-    std::cout << "Um zu gewinnen muessen Sie noch " << opponentBoard->totalShipsNotSunk << " Schiffe versenken!" << std::endl;
+    std::cout << "In order to win you still have to sink " << opponentBoard->totalShipsNotSunk << " ships!" << std::endl;
     return std::move(opponentBoard);
 }
 
 std::unique_ptr<Board> GameLoop::letOpponentGuess(std::unique_ptr<Board> playerBoard, int smartness) {
-    std::cout << std::endl << "Der Gegner ist dran:";
+    std::cout << std::endl << "It's the opponent's turn:";
     playerBoard = Opponent::makeGuess(std::move(playerBoard), smartness);
     playerBoard->printGuessField();
-    std::cout << "Der Gegner muss noch " << playerBoard->totalShipsNotSunk << " Schiffe versenken, um zu gewinnen." << std::endl;
+    std::cout << "The enemy still needs to sink " << playerBoard->totalShipsNotSunk << " ships in order to win." << std::endl;
     return std::move(playerBoard);
 }
 
@@ -230,7 +230,7 @@ void GameLoop::printInstructions() {
 }
 
 void GameLoop::invalidInput() {
-    std::cout << std::endl << "Dies ist eine ungueltige Eingabe!" << std::endl;
+    std::cout << std::endl << "This is an invalid input" << std::endl;
 }
 
 Coordinates GameLoop::turnStringVectorIntoCoordinates(std::vector<std::string> inputsVector) {
@@ -260,36 +260,36 @@ Coordinates GameLoop::turnStringVectorIntoCoordinates(std::vector<std::string> i
 }
 
 void GameLoop::printMainMenu() {
-    std::cout << std::endl << "HAUPTMENUE:" << std::endl;
-    std::cout << std::endl << "Ihre Optionen:" << std::endl <<
-              "  (0) Anweisungen und Regeln       (1) neues Spiel starten" << std::endl <<
-              "  (2) gespeichertes Spiel laden    (3) Spielstand loeschen" << std::endl <<
-              "  (4) beenden" << std::endl;
+    std::cout << std::endl << "MAIN MENU:" << std::endl;
+    std::cout << std::endl << "Your options:" << std::endl <<
+              "  (0) Tutorial and rules       (1) Start new games" << std::endl <<
+              "  (2) Load saved game    (3) Delete saved game" << std::endl <<
+              "  (4) Exit" << std::endl;
 }
 
 void GameLoop::startNewGame() {
     std::string input;
-    std::cout << std::endl << "Welche Groesse soll das Spielfeld haben? (Erlaubte Groessen:5-30 Normal:10)" << std::endl;
+    std::cout << std::endl << "What size do you want the board to be? (Valid sizes:5-30 Default:10)" << std::endl;
     int sizeInput = 0;
     do {
         if (sizeInput != 0) {
-            std::cout << "Ungueltige Eingabe" << std::endl;
+            std::cout << "Invalid input" << std::endl;
         }
         std::cin >> input;
         sizeInput = HelpFunctions::stringToInt(input);
     } while (!(sizeInput <= 30 && sizeInput >= 5));
-    std::cout << std::endl << "Welchen Schwierigkeitsgrad moechten Sie waehlen? (Schwierigkeitsgrade:1-10 10=schwerstes)" << std::endl;
+    std::cout << std::endl << "What difficulty do you want your opponent to be? (Difficulty:1-10 10=hardest)" << std::endl;
     int difficultyInput = 0;
     do {
         if (difficultyInput != 0) {
-            std::cout << "Ungueltige Eingabe" << std::endl;
+            std::cout << "Invalid input" << std::endl;
         }
         std::cin >> input;
         difficultyInput = HelpFunctions::stringToInt(input);
     } while (!(difficultyInput <= 10 && difficultyInput >= 1));
     std::unique_ptr<Board> playerBoard = std::make_unique<Board>(sizeInput);
     std::unique_ptr<Board> opponentBoard = std::make_unique<Board>(sizeInput);
-    std::cout << std::endl << "DAS SPIEL BEGINNT" << std::endl;
+    std::cout << std::endl << "THE GAME BEGINS" << std::endl;
     GameLoop::startGame(std::move(playerBoard), std::move(opponentBoard), difficultyInput);
 }
 
@@ -300,7 +300,7 @@ void GameLoop::tryLoadGame() {
         gameState.opponentBoard->allShipsAlreadySet();
         GameLoop::startGame(std::move(gameState.playerBoard), std::move(gameState.opponentBoard), gameState.opponentLevel);
     } else {
-        std::cout << std::endl << "Spielstand konnte nicht geladen werden" << std::endl;
+        std::cout << std::endl << "Unable to load saved game" << std::endl;
     }
 }
 
