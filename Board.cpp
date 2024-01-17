@@ -8,7 +8,6 @@
 
 Board::Board(int boardSize) {
     size = boardSize;
-    // speichere die Größe des Boards
     for (int xPos = 0; xPos < size; xPos++) {
         for (int yPos = 0; yPos < size; yPos++) {
             if (xPos == 0) {
@@ -21,46 +20,46 @@ Board::Board(int boardSize) {
             guessField.at(xPos).push_back(GuessStatus::notGuessed);
         }
     }
-    // initialisiere beide Felder
+    // initialize both Fields
     int neededShipsOfSize;
     for (int shipSize = 2; shipSize <= 5; shipSize++) {
-        // beginne bei Schiffen mit der Größe 2
+        // begin with ships of size 2
         neededShipsOfSize = GameRule::getNumberOfShipsOfSizeWhenBoardSize(size, shipSize);
-        // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
+        // find out how many ships of the current size are needed for a board of the given size
         shipsLeftToSet.insert(std::make_pair(shipSize, neededShipsOfSize));
-        // inseriere die Anzahl der benötigten Schiffe der jeweiligen Größe in die Map
+        // insert the number of needed ships into the map
         totalShipsNotSunk += neededShipsOfSize;
-        // zähle die Anzahl der Schiffe zu bisherigen Zahl der Schiffe hinzu
+        // add the number of ships to the total of ships
     }
-    // wiederhole für alle Schiffe der Größe 2 bis 5
+    // repeat this for all ships of sizes 2 to 5
 }
 
 void Board::reset() {
-    // speichere die Größe des Boards
+    // save the size of the Board
     for (int xPos = 0; xPos < size; xPos++) {
         for (int yPos = 0; yPos < size; yPos++) {
             shipField.at(xPos).at(yPos) = false;
             guessField.at(xPos).at(yPos) = GuessStatus::notGuessed;
         }
     }
-    // initialisiere beide Felder
+    // initialize both fields
     int shipSize = 2;
-    // beginne bei Schiffen mit der Größe 2
+    // begin with ships of size 2
     int neededShipsOfSize = GameRule::getNumberOfShipsOfSizeWhenBoardSize(size, shipSize);
-    // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
+    // find out how many ships of the current size are needed for a board of the given size
     totalShipsNotSunk = 0;
     while(neededShipsOfSize != 0) {
         shipsLeftToSet.find(shipSize)->second = neededShipsOfSize;
         // shipsNotSunk.insert(std::make_pair(shipSize, neededShipsOfSize));
-        // inseriere die Anzahl der benötigten Schiffe der jeweiligen Größe in die Maps
+        // insert the number of needed ships into the map
         totalShipsNotSunk += neededShipsOfSize;
-        // zähle die Anzahl der Schiffe zu bisherigen Zahl der Schiffe hinzu
+        // add the number of ships to the total of ships
         shipSize++;
-        // gehe zu den nächstgrößeren Schiffen
+        // got to the next largest ship
         neededShipsOfSize = GameRule::getNumberOfShipsOfSizeWhenBoardSize(size, shipSize);
-        // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
+        // find out how many ships of the current size are needed for a board of the given size
     }
-    // wiederhole so lange, bis die Schiffsgröße so groß ist, dass kein Schiff der Größe benötigt wird
+    //repeat untill the sip is large enough that no ship of this size is needed
     possibleToSetAllShips = true;
 }
 
