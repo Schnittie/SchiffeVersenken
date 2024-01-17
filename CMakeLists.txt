@@ -14,4 +14,6 @@ add_executable(SchiffeVersenken_Projekt_ Battleship.cpp
         GameLoop.h
         CppRandom.hpp
         GameRule.cpp
-        Coordinates.cpp)
+        Coordinates.cpp
+        HelpFunctions.h
+        HelpFunctions.cpp)

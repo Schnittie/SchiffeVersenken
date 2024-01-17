@@ -7,6 +7,7 @@
 #include "GameLoop.h"
 #include "Opponent.h"
 #include "Persistance.h"
+#include "HelpFunctions.h"
 
 void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Board> opponentBoard, int difficulty) {
     if (opponentBoard->shipsLeftToSet.find(2)->second + opponentBoard->shipsLeftToSet.find(3)->second +
@@ -24,7 +25,7 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
 //        playerBoard = requestShipSet(std::move(playerBoard));
         sizeOfBiggestShipLeftToSet = requestNewShipField(std::move(playerBoard->createCopy()));
         do {
-            inputsVector = readCInIntoVector();
+            inputsVector = HelpFunctions::readCInIntoVector();
         } while (inputsVector.empty());
         if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '0') {
             printInstructions();
@@ -45,7 +46,7 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
             numberOfGuessesBefore = opponentBoard->guessCounter;
             requestNewGuess(std::move(opponentBoard->createCopy()));
             do {
-                inputsVector = readCInIntoVector();
+                inputsVector = HelpFunctions::readCInIntoVector();
             } while (inputsVector.empty());
             if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '0') {
                 printInstructions();
@@ -171,25 +172,6 @@ std::unique_ptr<Board> GameLoop::letOpponentGuess(std::unique_ptr<Board> playerB
     playerBoard->printGuessField();
     std::cout << "Der Gegner muss noch " << playerBoard->totalShipsNotSunk << " Schiffe versenken, um zu gewinnen." << std::endl;
     return std::move(playerBoard);
-}
-
-std::vector<std::string> GameLoop::readCInIntoVector(){
-    std::string input;
-    std::string singleInput;
-    std::vector<std::string> inputs;
-    std::getline(std::cin, input);
-    for (char c: input) {
-        if (c != ' ') {
-            singleInput.push_back(c);
-        } else {
-            inputs.push_back(singleInput);
-            singleInput.clear();
-        }
-    }
-    if (!singleInput.empty()) {
-        inputs.push_back(singleInput);
-    }
-    return inputs;
 }
 
 void GameLoop::printInstructions() {

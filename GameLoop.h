@@ -11,7 +11,6 @@
 
 class GameLoop {
 private:
-    static std::vector<std::string> readCInIntoVector();
     static int requestNewShipField(std::unique_ptr<Board>);
     static void requestNewGuess(std::unique_ptr<Board>);
 public:

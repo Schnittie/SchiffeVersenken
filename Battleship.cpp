@@ -3,16 +3,8 @@
 #include "Opponent.h"
 #include "Persistance.h"
 #include "GameLoop.h"
+#include "HelpFunctions.h"
 #include <memory>
-
-
-int stringToInt(const std::string& input) {
-    int returnInt = 0;
-    for (char c: input) {
-        returnInt = returnInt*10 + (static_cast<int>(c) - 48);
-    }
-    return returnInt;
-}
 
 int main() {
     std::cout << "    ____  ___  ______________    ___________ __  __________ \n"
@@ -43,7 +35,7 @@ int main() {
                     std::cout << "Ungueltige Eingabe" << std::endl;
                 }
                 std::cin >> input;
-                sizeInput = stringToInt(input);
+                sizeInput = HelpFunctions::stringToInt(input);
             } while (!(sizeInput <= 30 && sizeInput >= 5));
                 std::cout << std::endl << "Welchen Schwierigkeitsgrad moechten Sie waehlen? (Schwierigkeitsgrade:1-10 10=schwerstes)" << std::endl;
                 int difficultyInput = 0;
@@ -52,7 +44,7 @@ int main() {
                         std::cout << "Ungueltige Eingabe" << std::endl;
                     }
                     std::cin >> input;
-                    difficultyInput = stringToInt(input);
+                    difficultyInput = HelpFunctions::stringToInt(input);
                 } while (!(difficultyInput <= 10 && difficultyInput >= 1));
                 std::unique_ptr<Board> playerBoard = std::make_unique<Board>(sizeInput);
                 std::unique_ptr<Board> opponentBoard = std::make_unique<Board>(sizeInput);
