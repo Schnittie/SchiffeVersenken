@@ -10,6 +10,7 @@
 #include "HelpFunctions.h"
 
 void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Board> opponentBoard, int difficulty) {
+    bool quitGame = false;
     if (!HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(opponentBoard->createCopy()))) {
         opponentBoard = Opponent::placeAllShips(std::move(opponentBoard));
         std::cout << std::endl << "Der Gegner hat alle seine Schiffe gesetzt.";
@@ -17,26 +18,11 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
     std::cout << std::endl << std::endl << "Ihr Feld:";
     playerBoard->printShipField();
     std::vector<std::string> inputsVector;
-    bool quitGame = false;
-    int sizeOfBiggestShipLeftToSet;
-    while (!HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(playerBoard->createCopy())) && !quitGame) {
-//        playerBoard = requestShipSet(std::move(playerBoard));
-        sizeOfBiggestShipLeftToSet = requestNewShipField(std::move(playerBoard->createCopy()));
-        do {
-            inputsVector = HelpFunctions::readCInIntoVector();
-        } while (inputsVector.empty());
-        if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '0') {
-            printInstructions();
-        } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '1') {
-            quitGame = true;
-        } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '2') {
-            playerBoard = Opponent::placeAllShips(std::move(playerBoard));
-        } else {
-            playerBoard = requestShipSet(std::move(playerBoard), inputsVector, sizeOfBiggestShipLeftToSet);
-        }
-    }
-    if (!quitGame) {
+    playerBoard = tryToRequestAllShipsSet(std::move(playerBoard));
+    if (HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(playerBoard->createCopy()))) {
         std::cout << std::endl << "Nun geht es ans Felder aufdecken!" << std::endl;
+    } else {
+        quitGame = true;
     }
     while (playerBoard->totalShipsNotSunk > 0 && opponentBoard->totalShipsNotSunk > 0 && !quitGame) {
         int numberOfGuessesBefore;
@@ -76,19 +62,56 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
     }
 }
 
-int GameLoop::requestNewShipField(std::unique_ptr<Board> playerBoard) {
+void GameLoop::requestNewShipField(std::unique_ptr<Board> playerBoard) {
+    std::cout << "Sie setzen als naechstes ein Schiff der Groesse " <<
+    getSizeOfBiggestShipLeftToSet(std::move(playerBoard->createCopy())) << ".";
+    std::cout << std::endl << "Bitte geben Sie die Werte des Ausgangsfelds durch ein Leerzeichen getrennt an!";
+    std::cout << std::endl << "( (0) Anweisungen und Regeln    (1) Spiel abbrechen und zurueck zum Hauptmenue";
+    std::cout << std::endl << "  (2) restliche Schiffe zufaellig setzen )" << std::endl;
+}
+
+int GameLoop::getSizeOfBiggestShipLeftToSet(std::unique_ptr<Board> board) {
     int sizeOfBiggestShipLeftToSet = 0;
     for (int shipSize = 5; shipSize >= 2; shipSize--) {
-        if (playerBoard->shipsLeftToSet.find(shipSize)->second > 0) {
+        if (board->shipsLeftToSet.find(shipSize)->second > 0) {
             sizeOfBiggestShipLeftToSet = shipSize;
             break;
         }
     }
-    std::cout << "Sie setzen als naechstes ein Schiff der Groesse " << sizeOfBiggestShipLeftToSet << ".";
-    std::cout << std::endl << "Bitte geben Sie die Werte des Ausgangsfelds durch ein Leerzeichen getrennt an!";
-    std::cout << std::endl << "( (0) Anweisungen und Regeln    (1) Spiel abbrechen und zurueck zum Hauptmenue";
-    std::cout << std::endl << "  (2) restliche Schiffe zufaellig setzen )" << std::endl;
     return sizeOfBiggestShipLeftToSet;
+}
+
+std::unique_ptr<Board> GameLoop::tryToRequestAllShipsSet(std::unique_ptr<Board> board) {
+    bool quitGame = false;
+    std::vector<std::string> inputsVector;
+    while (!HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(board->createCopy())) && !quitGame) {
+        // wiederhole so lange, bis entweder von allen Schiffsgrößen in ShipsLeftToSet im Board keine mehr gesetzt werden
+        // müssen oder quitGame auf true gesetzt wurde
+        requestNewShipField(std::move(board->createCopy()));
+        // fordert den Spieler an, "Koordinaten" einzugeben, für das Feld, von dem ausgehend er das Schiff setzen möchte
+        do {
+            inputsVector = HelpFunctions::readCInIntoVector();
+        } while (inputsVector.empty());
+        // warte, bis der Spieler eine Eingabe gemacht und nicht nur eine neue Zeile angefangen hat
+        if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1) {
+            if (inputsVector.at(0).at(0) == '0') {
+                printInstructions();
+            } else if (inputsVector.at(0).at(0) == '1') {
+                quitGame = true;
+            } else if (inputsVector.at(0).at(0) == '2') {
+                board = Opponent::placeAllShips(std::move(board));
+            } else {
+                board = requestShipSet(std::move(board), inputsVector,
+                                       getSizeOfBiggestShipLeftToSet(std::move(board->createCopy())));
+            }
+            // wenn nur ein Zeichen eingegeben wurde und dieses entweder 1, 2 oder 3 ist, dann führe die entsprechende Funktion aus,
+            // wenn nicht, dann führe requestShipSet aus, versuche also für die gegebenen Eingabe ein Schiff zu setzen
+        } else {
+            board = requestShipSet(std::move(board), inputsVector,
+                                   getSizeOfBiggestShipLeftToSet(std::move(board->createCopy())));
+        }
+    }
+    return std::move(board);
 }
 
 std::unique_ptr<Board> GameLoop::requestShipSet(std::unique_ptr<Board> playerBoard, std::vector<std::string> inputsVector,

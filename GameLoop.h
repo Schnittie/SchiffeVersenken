@@ -11,7 +11,8 @@
 
 class GameLoop {
 private:
-    static int requestNewShipField(std::unique_ptr<Board>);
+    static void requestNewShipField(std::unique_ptr<Board>);
+    static int getSizeOfBiggestShipLeftToSet(std::unique_ptr<Board>);
     static void requestNewGuess(std::unique_ptr<Board>);
 public:
     static void startGame(std::unique_ptr<Board>, std::unique_ptr<Board>, int);
@@ -19,6 +20,7 @@ public:
     static std::unique_ptr<Board> interpretGuess(std::unique_ptr<Board>, std::vector<std::string>);
     static std::unique_ptr<Board> letOpponentGuess(std::unique_ptr<Board>, int);
     static Coordinates turnStringVectorIntoCoordinates(std::vector<std::string>);
+    static std::unique_ptr<Board> tryToRequestAllShipsSet(std::unique_ptr<Board>);
 
     static void invalidInput();
     static void printMainMenu();

@@ -47,7 +47,7 @@ std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
         }
     }
     // setzt alle zu platzierenden Schiffe zufällig
-    return board;
+    return std::move(board);
 }
 
 std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board, int smartness) { // hier hab ich nur xPos yPos durch Coords getauscht aber sonst kein refactoring betrieben, weil wir uns diese Methode glaube ich sowieso nochmal anschauen müssen
