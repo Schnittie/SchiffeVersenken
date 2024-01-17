@@ -9,6 +9,63 @@
 #include "Persistance.h"
 #include "HelpFunctions.h"
 
+
+void GameLoop::printMainMenu() {
+    std::cout << std::endl << "MAIN MENU:" << std::endl;
+    std::cout << std::endl << "Your options:" << std::endl <<
+              "  (0) Tutorial and rules       (1) Start new games" << std::endl <<
+              "  (2) Load saved game    (3) Delete saved game" << std::endl <<
+              "  (4) Exit" << std::endl;
+}
+
+void GameLoop::tryLoadGame() {
+    GameState gameState = Persistance::loadGame();
+    if (gameState.playerBoard != nullptr && gameState.opponentBoard != nullptr) {
+        gameState.playerBoard->allShipsAlreadySet();
+        gameState.opponentBoard->allShipsAlreadySet();
+        GameLoop::startGame(std::move(gameState.playerBoard), std::move(gameState.opponentBoard), gameState.opponentLevel);
+        // wenn das Laden des Spiels erfolgreich war und beide Boards im gameState Objekt vorhanden sind,
+        // wird das Spiel mit dem geladenen Spielstand gestartet
+    } else {
+        std::cout << std::endl << "Unable to load saved game" << std::endl;
+    }
+}
+
+void GameLoop::startNewGame() {
+    std::string input;
+    std::cout << std::endl << "What size do you want the board to be? (Valid sizes:5-30 Default:10)" << std::endl;
+    int sizeInput = 0;
+    do {
+        if (sizeInput != 0) {
+            invalidInput();
+            std::cout << "Please try again:" << std::endl;
+            // Eingabe hat nicht den erwarteten Werten genügt → Fehlermeldung
+        }
+        std::cin >> input;
+        sizeInput = HelpFunctions::stringToInt(input);
+        // wandelt den String in einen int um
+    } while (!(sizeInput <= 30 && sizeInput >= 5));
+    // wiederhole so lange, bis eine valide Eingabe erfolgt
+    std::cout << std::endl << "What difficulty do you want your opponent to be? (Difficulty:1-10 10=hardest)" << std::endl;
+    int difficultyInput = 0;
+    do {
+        if (difficultyInput != 0) {
+            invalidInput();
+            std::cout << "Please try again:" << std::endl;
+            // Eingabe hat nicht den erwarteten Werten genügt → Fehlermeldung
+        }
+        std::cin >> input;
+        difficultyInput = HelpFunctions::stringToInt(input);
+        // wandelt den String in einen int um
+    } while (!(difficultyInput <= 10 && difficultyInput >= 1));
+    // wiederhole so lange, bis eine valide Eingabe erfolgt
+    std::unique_ptr<Board> playerBoard = std::make_unique<Board>(sizeInput);
+    std::unique_ptr<Board> opponentBoard = std::make_unique<Board>(sizeInput);
+    std::cout << std::endl << "THE GAME BEGINS" << std::endl;
+    GameLoop::startGame(std::move(playerBoard), std::move(opponentBoard), difficultyInput);
+    // erstellt die entsprechenden Boards und startet das Spiel
+}
+
 void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Board> opponentBoard, int difficulty) {
     bool quitRound = false;
     if (!HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(opponentBoard->createCopy()))) {
@@ -296,61 +353,5 @@ Coordinates GameLoop::turnStringVectorIntoCoordinates(std::vector<std::string> i
     // gerechnet und die nächste Ziffer in eine int gecastet - 48 gerechnet und aufaddiert, bis alle Ziffern durch sind
     // (Ascii-Code von 1=48, 2=49, ...) → der Wert wird vom String in eine Int umgewandelt
     return {xPos, yPos};
-}
-
-void GameLoop::printMainMenu() {
-    std::cout << std::endl << "MAIN MENU:" << std::endl;
-    std::cout << std::endl << "Your options:" << std::endl <<
-              "  (0) Tutorial and rules       (1) Start new games" << std::endl <<
-              "  (2) Load saved game    (3) Delete saved game" << std::endl <<
-              "  (4) Exit" << std::endl;
-}
-
-void GameLoop::startNewGame() {
-    std::string input;
-    std::cout << std::endl << "What size do you want the board to be? (Valid sizes:5-30 Default:10)" << std::endl;
-    int sizeInput = 0;
-    do {
-        if (sizeInput != 0) {
-            invalidInput();
-            std::cout << "Please try again:" << std::endl;
-            // Eingabe hat nicht den erwarteten Werten genügt → Fehlermeldung
-        }
-        std::cin >> input;
-        sizeInput = HelpFunctions::stringToInt(input);
-        // wandelt den String in einen int um
-    } while (!(sizeInput <= 30 && sizeInput >= 5));
-    // wiederhole so lange, bis eine valide Eingabe erfolgt
-    std::cout << std::endl << "What difficulty do you want your opponent to be? (Difficulty:1-10 10=hardest)" << std::endl;
-    int difficultyInput = 0;
-    do {
-        if (difficultyInput != 0) {
-            invalidInput();
-            std::cout << "Please try again:" << std::endl;
-            // Eingabe hat nicht den erwarteten Werten genügt → Fehlermeldung
-        }
-        std::cin >> input;
-        difficultyInput = HelpFunctions::stringToInt(input);
-        // wandelt den String in einen int um
-    } while (!(difficultyInput <= 10 && difficultyInput >= 1));
-    // wiederhole so lange, bis eine valide Eingabe erfolgt
-    std::unique_ptr<Board> playerBoard = std::make_unique<Board>(sizeInput);
-    std::unique_ptr<Board> opponentBoard = std::make_unique<Board>(sizeInput);
-    std::cout << std::endl << "THE GAME BEGINS" << std::endl;
-    GameLoop::startGame(std::move(playerBoard), std::move(opponentBoard), difficultyInput);
-    // erstellt die entsprechenden Boards und startet das Spiel
-}
-
-void GameLoop::tryLoadGame() {
-    GameState gameState = Persistance::loadGame();
-    if (gameState.playerBoard != nullptr && gameState.opponentBoard != nullptr) {
-        gameState.playerBoard->allShipsAlreadySet();
-        gameState.opponentBoard->allShipsAlreadySet();
-        GameLoop::startGame(std::move(gameState.playerBoard), std::move(gameState.opponentBoard), gameState.opponentLevel);
-        // wenn das Laden des Spiels erfolgreich war und beide Boards im gameState Objekt vorhanden sind,
-        // wird das Spiel mit dem geladenen Spielstand gestartet
-    } else {
-        std::cout << std::endl << "Unable to load saved game" << std::endl;
-    }
 }
 
