@@ -10,8 +10,7 @@
 #include "HelpFunctions.h"
 
 void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Board> opponentBoard, int difficulty) {
-    if (opponentBoard->shipsLeftToSet.find(2)->second + opponentBoard->shipsLeftToSet.find(3)->second +
-        opponentBoard->shipsLeftToSet.find(4)->second + opponentBoard->shipsLeftToSet.find(5)->second > 0) {
+    if (!HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(opponentBoard->createCopy()))) {
         opponentBoard = Opponent::placeAllShips(std::move(opponentBoard));
         std::cout << std::endl << "Der Gegner hat alle seine Schiffe gesetzt.";
     }
@@ -20,8 +19,7 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
     std::vector<std::string> inputsVector;
     bool quitGame = false;
     int sizeOfBiggestShipLeftToSet;
-    while (playerBoard->shipsLeftToSet.find(2)->second + playerBoard->shipsLeftToSet.find(3)->second +
-        playerBoard->shipsLeftToSet.find(4)->second + playerBoard->shipsLeftToSet.find(5)->second > 0 && !quitGame) {
+    while (!HelpFunctions::valuesOfShipsLeftToSetAreZero(std::move(playerBoard->createCopy())) && !quitGame) {
 //        playerBoard = requestShipSet(std::move(playerBoard));
         sizeOfBiggestShipLeftToSet = requestNewShipField(std::move(playerBoard->createCopy()));
         do {

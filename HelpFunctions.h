@@ -8,11 +8,14 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include "Board.h"
 
 class HelpFunctions {
 public:
     static int stringToInt(const std::string&);
     static std::vector<std::string> readCInIntoVector();
+    static bool valuesOfShipsLeftToSetAreZero(std::unique_ptr<Board>);
 };
 
 #endif //SCHIFFEVERSENKEN_PROJEKT__HELPFUNCTIONS_H

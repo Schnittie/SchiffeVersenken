@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <algorithm>
 #include "HelpFunctions.h"
 
 int HelpFunctions::stringToInt(const std::string& input) {
@@ -30,4 +31,11 @@ std::vector<std::string> HelpFunctions::readCInIntoVector(){
         inputs.push_back(singleInput);
     }
     return inputs;
+}
+
+bool HelpFunctions::valuesOfShipsLeftToSetAreZero(std::unique_ptr<Board> board) {
+    return board->shipsLeftToSet.find(2)->second
+        + board->shipsLeftToSet.find(3)->second
+        + board->shipsLeftToSet.find(4)->second
+        + board->shipsLeftToSet.find(5)->second <= 0;
 }
