@@ -101,4 +101,5 @@ int GameRule::getNumberOfShipsOfSizeWhenBoardSize(int boardSize, int shipSize) {
         default:
             return 0;
     }
+    // gibt die Anzahl der jeweils benötigten Schiffe bei der gegebenen Feldgröße zurück
 }

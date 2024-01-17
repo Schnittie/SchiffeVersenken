@@ -16,6 +16,7 @@ class GameRule {
 public:
     // gib true zurück wenn Schiff in Bord platzierbar, sonst false
     static bool shipAddCorrect(int, Coordinates, Direction, std::unique_ptr<Board>);
+
     static bool shipDestroyed(Coordinates, std::unique_ptr<Board>);
     static bool insideField(Coordinates, int);
     static int getNumberOfShipsOfSizeWhenBoardSize(int, int);

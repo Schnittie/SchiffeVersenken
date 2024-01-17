@@ -13,8 +13,8 @@
 void GameLoop::printMainMenu() {
     std::cout << std::endl << "MAIN MENU:" << std::endl;
     std::cout << std::endl << "Your options:" << std::endl <<
-              "  (0) Tutorial and rules       (1) Start new games" << std::endl <<
-              "  (2) Load saved game    (3) Delete saved game" << std::endl <<
+              "  (0) Tutorial and rules       (1) Start new game" << std::endl <<
+              "  (2) Load saved game          (3) Delete saved game" << std::endl <<
               "  (4) Exit" << std::endl;
 }
 
@@ -275,9 +275,9 @@ std::unique_ptr<Board> GameLoop::interpretGuess(std::unique_ptr<Board> opponentB
     return std::move(opponentBoard);
 }
 
-std::unique_ptr<Board> GameLoop::letOpponentGuess(std::unique_ptr<Board> playerBoard, int smartness) {
+std::unique_ptr<Board> GameLoop::letOpponentGuess(std::unique_ptr<Board> playerBoard, int difficulty) {
     std::cout << std::endl << "It's the opponent's turn:";
-    playerBoard = Opponent::makeGuess(std::move(playerBoard), smartness);
+    playerBoard = Opponent::makeGuess(std::move(playerBoard), difficulty);
     playerBoard->printGuessField();
     std::cout << "The enemy still needs to sink " << playerBoard->totalShipsNotSunk << " ships in order to win." << std::endl;
     return std::move(playerBoard);
