@@ -34,18 +34,20 @@ public:
 
     std::vector<std::vector<bool>> shipField;
     std::vector<std::vector<GuessStatus>> guessField;
-    Board();
+
     explicit Board(int);
 
     void reset();
 
     //Methode bekommt Größe, Ursprungsposition (x und y) und Ausrichtung von Ursprungsposition aus und gibt bool zurück, ob Platzierung geklappt hat
     bool addShip(int, Coordinates, Direction);
+
     GuessStatus makeGuess(Coordinates);
-    GuessStatus guessFieldStatus(Coordinates);
-    void allShipsAlreadySet();
+    GuessStatus guessFieldValue(Coordinates);
+    bool shipFieldValue(Coordinates);
 
     std::unique_ptr<Board> createCopy();
+    void allShipsAlreadySet();
 
     void printGuessField();
     void printShipField();

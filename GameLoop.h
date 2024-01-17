@@ -20,7 +20,6 @@ public:
     static std::unique_ptr<Board> letOpponentGuess(std::unique_ptr<Board>, int);
     static Coordinates turnStringVectorIntoCoordinates(std::vector<std::string>);
 
-
     static void invalidInput();
     static void printMainMenu();
     static void startNewGame();
