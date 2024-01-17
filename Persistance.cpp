@@ -96,9 +96,9 @@ void Persistance::deleteSave(){
 
     // Attempt to delete the file
     if (std::remove(filePath.c_str()) == 0) {
-        std::cout << filePath << " wurde erfolgreich gelöscht" << std::endl;
+        std::cout << filePath << " wurde erfolgreich geloescht" << std::endl;
     } else {
-        std::cout << filePath << " konnte nicht gelöscht werden" << std::endl;
+        std::cout << filePath << " konnte nicht geloescht werden" << std::endl;
     }
 }
 
@@ -254,6 +254,7 @@ int Persistance::getIntFromGuessStatus(GuessStatus guessStatus) {
         case GuessStatus::sunkShip:
             return 4;
     }
+    return 5;
 }
 
 GuessStatus Persistance::getGuessStatusFromChar(char i) {

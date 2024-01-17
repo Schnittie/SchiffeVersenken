@@ -23,7 +23,6 @@ public:
 
     Coordinates(int, int);
 
-//    explicit Coordinates(Direction);
     static Coordinates applyDirectionChange(Coordinates, Direction);
     static std::vector<Direction> getListOfAllDirections();
     static Direction getOppositeDirection(Direction);

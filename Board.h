@@ -34,8 +34,6 @@ public:
 
     std::vector<std::vector<bool>> shipField;
     std::vector<std::vector<GuessStatus>> guessField;
-//    bool shipField[10][10]{};
-//    GuessStatus guessField[10][10]{};
     Board();
     explicit Board(int);
 
@@ -45,6 +43,7 @@ public:
     bool addShip(int, Coordinates, Direction);
     GuessStatus makeGuess(Coordinates);
     GuessStatus guessFieldStatus(Coordinates);
+    void allShipsAlreadySet();
 
     std::unique_ptr<Board> createCopy();
 

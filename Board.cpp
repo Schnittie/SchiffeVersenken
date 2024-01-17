@@ -22,21 +22,17 @@ Board::Board(int boardSize) {
         }
     }
     // initialisiere beide Felder
-    int shipSize = 2;
-    // beginne bei Schiffen mit der Größe 2
-    int neededShipsOfSize = GameRule::getNumberOfShipsOfSizeWhenBoardSize(size, shipSize);
-    // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
-    while(neededShipsOfSize != 0) {
+    int neededShipsOfSize;
+    for (int shipSize = 2; shipSize <= 5; shipSize++) {
+        // beginne bei Schiffen mit der Größe 2
+        neededShipsOfSize = GameRule::getNumberOfShipsOfSizeWhenBoardSize(size, shipSize);
+        // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
         shipsLeftToSet.insert(std::make_pair(shipSize, neededShipsOfSize));
         // inseriere die Anzahl der benötigten Schiffe der jeweiligen Größe in die Map
         totalShipsNotSunk += neededShipsOfSize;
         // zähle die Anzahl der Schiffe zu bisherigen Zahl der Schiffe hinzu
-        shipSize++;
-        // gehe zu den nächstgrößeren Schiffen
-        neededShipsOfSize = GameRule::getNumberOfShipsOfSizeWhenBoardSize(size, shipSize);
-        // finde heraus wie viele Schiffe der aktuellen Größe bei dem Board der gegebenen Größe benötigt werden
     }
-    // wiederhole so lange, bis die Schiffsgröße so groß ist, dass kein Schiff der Größe benötigt wird
+    // wiederhole für alle Schiffe der Größe 2 bis 5
 }
 
 Board::Board() : Board(10) { /* da default size = 10 */ };
@@ -237,5 +233,13 @@ std::unique_ptr<Board> Board::createCopy() {
     }
     boardCopy->totalShipsNotSunk = this->totalShipsNotSunk;
     return boardCopy;
+}
+
+void Board::allShipsAlreadySet() {
+    for (int shipSize = 2; shipSize <= 5; ++shipSize) {
+        if (shipsLeftToSet.find(shipSize) != shipsLeftToSet.end()) {
+            shipsLeftToSet.find(shipSize)->second = 0;
+        }
+    }
 }
 

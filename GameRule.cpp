@@ -16,7 +16,7 @@ bool GameRule::shipAddCorrect(int shipSize, Coordinates coordinates, Direction d
         return false;
     }
     // testen, ob alle Schiffsfelder innerhalb von Board und nicht neben anderem Schiffsfeld
-    int fieldsToSet = shipSize; // shipSize ist am Anfang Größe des zu setzenden Bootes
+    int fieldsToSet = shipSize; // shipSize ist am Anfang Größe des zu setzenden Schiffs
     while (fieldsToSet > 0) {
         if (!insideField(coordinates, board->size) || board->shipField.at(coordinates.x).at(coordinates.y)) {
             // aktuell zu behandelndes Feld ist nicht innerhalb des Boards (→ Schiff würde nicht komplett im Feld liegen)

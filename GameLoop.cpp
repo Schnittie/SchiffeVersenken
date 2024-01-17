@@ -18,11 +18,11 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
     playerBoard->printShipField();
     std::vector<std::string> inputsVector;
     bool quitGame = false;
-    int sizeOfBiggestBoatLeftToSet;
+    int sizeOfBiggestShipLeftToSet;
     while (playerBoard->shipsLeftToSet.find(2)->second + playerBoard->shipsLeftToSet.find(3)->second +
         playerBoard->shipsLeftToSet.find(4)->second + playerBoard->shipsLeftToSet.find(5)->second > 0 && !quitGame) {
 //        playerBoard = requestShipSet(std::move(playerBoard));
-        sizeOfBiggestBoatLeftToSet = requestNewShipField(std::move(playerBoard->createCopy()));
+        sizeOfBiggestShipLeftToSet = requestNewShipField(std::move(playerBoard->createCopy()));
         do {
             inputsVector = readCInIntoVector();
         } while (inputsVector.empty());
@@ -30,8 +30,10 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
             printInstructions();
         } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '1') {
             quitGame = true;
+        } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '2') {
+            playerBoard = Opponent::placeAllShips(std::move(playerBoard));
         } else {
-            playerBoard = requestShipSet(std::move(playerBoard), inputsVector, sizeOfBiggestBoatLeftToSet);
+            playerBoard = requestShipSet(std::move(playerBoard), inputsVector, sizeOfBiggestShipLeftToSet);
         }
     }
     if (!quitGame) {
@@ -58,36 +60,40 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
             } else {
                 opponentBoard = interpretGuess(std::move(opponentBoard), inputsVector);
             }
-//            opponentBoard = requestGuess(std::move(opponentBoard));
         } while (opponentBoard->guessCounter == numberOfGuessesBefore && !quitGame);
         std::this_thread::sleep_for(std::chrono::seconds(2));
-        if (opponentBoard->totalShipsNotSunk > 0) {
+        if (opponentBoard->totalShipsNotSunk > 0 && !quitGame) {
             playerBoard = letOpponentGuess(std::move(playerBoard), difficulty);
         }
     }
     if (playerBoard->totalShipsNotSunk <= 0) {
-        std::cout << std::endl << "Der Gegner hat alle Ihre Schiffe zerstoert und dadurch gewonnen!!!";
+        std::cout << std::endl << "Der Gegner hat alle Ihre Schiffe zerstoert und dadurch gewonnen!!!" << std::endl <<
+            "Er hat dafuer " << playerBoard->guessCounter << " mal tippen muessen!" << std::endl << std::endl<<
+            "Das gegnerische Schlachtfeld waere gewesen:";
+            opponentBoard->printShipField();
     } else if (opponentBoard->totalShipsNotSunk <= 0) {
-        std::cout << std::endl << "Sie haben alle Schiffe des Gegners zerstoert und dadurch gewonnen!!! Glueckwunsch!!!";
+        std::cout << std::endl << "Sie haben alle Schiffe des Gegners zerstoert und dadurch gewonnen!!! Glueckwunsch!!!" << std::endl <<
+                               "Sie haben dafuer " << opponentBoard->guessCounter << " mal tippen müssen!" << std::endl;
     }
 }
 
 int GameLoop::requestNewShipField(std::unique_ptr<Board> playerBoard) {
-    int sizeOfBiggestBoatLeftToSet = 0;
-    for (int boatSize = 5; boatSize >= 2; boatSize--) {
-        if (playerBoard->shipsLeftToSet.find(boatSize)->second > 0) {
-            sizeOfBiggestBoatLeftToSet = boatSize;
+    int sizeOfBiggestShipLeftToSet = 0;
+    for (int shipSize = 5; shipSize >= 2; shipSize--) {
+        if (playerBoard->shipsLeftToSet.find(shipSize)->second > 0) {
+            sizeOfBiggestShipLeftToSet = shipSize;
             break;
         }
     }
-    std::cout << "Sie setzen als naechstes ein Boot der Groesse " << sizeOfBiggestBoatLeftToSet << ".";
+    std::cout << "Sie setzen als naechstes ein Schiff der Groesse " << sizeOfBiggestShipLeftToSet << ".";
     std::cout << std::endl << "Bitte geben Sie die Werte des Ausgangsfelds durch ein Leerzeichen getrennt an!";
-    std::cout << std::endl << "( (0) Anweisungen und Regeln    (1) Spiel abbrechen und zurueck zum Hauptmenue )" << std::endl;
-    return sizeOfBiggestBoatLeftToSet;
+    std::cout << std::endl << "( (0) Anweisungen und Regeln    (1) Spiel abbrechen und zurueck zum Hauptmenue";
+    std::cout << std::endl << "  (2) restliche Schiffe zufaellig setzen )" << std::endl;
+    return sizeOfBiggestShipLeftToSet;
 }
 
 std::unique_ptr<Board> GameLoop::requestShipSet(std::unique_ptr<Board> playerBoard, std::vector<std::string> inputsVector,
-                                                int sizeOfBiggestBoatLeftToSet) {
+                                                int sizeOfBiggestShipLeftToSet) {
     if (inputsVector.size() != 2) {
         invalidInput();
         return std::move(playerBoard);
@@ -110,7 +116,7 @@ std::unique_ptr<Board> GameLoop::requestShipSet(std::unique_ptr<Board> playerBoa
         printInstructions();
         return std::move(playerBoard);
     }
-    if (!playerBoard->addShip(sizeOfBiggestBoatLeftToSet, coordinates, Coordinates::charIntoDirection(input.at(0)))) {
+    if (!playerBoard->addShip(sizeOfBiggestShipLeftToSet, coordinates, Coordinates::charIntoDirection(input.at(0)))) {
         invalidInput();
         return std::move(playerBoard);
     }
@@ -167,17 +173,6 @@ std::unique_ptr<Board> GameLoop::letOpponentGuess(std::unique_ptr<Board> playerB
     return std::move(playerBoard);
 }
 
-
-std::vector<char> GameLoop::readCInIntoCharVector(){
-    std::string input;
-    std::vector<char> inputs;
-    std::getline(std::cin, input);
-    for (char c: input) {
-        inputs.push_back(c);
-    }
-    return inputs;
-}
-
 std::vector<std::string> GameLoop::readCInIntoVector(){
     std::string input;
     std::string singleInput;
@@ -222,7 +217,7 @@ void GameLoop::printInstructions() {
                               "beruehren. (Die auf dem eigenen Feld gesetzten Schiffe werden mit dem Zeichen @" << std::endl <<
                               "dargestellt.) Ist das erledigt, kann ab sofort nach jedem Spielzug gespeichert werden.";
     std::cout << std::endl << "Dann darf der Spieler anfangen auf eine Position des Feldes, auf dem der Gegner seine "
-                              "Boote platziert hat, zu tippen. " << std::endl <<
+                              "Schiffe platziert hat, zu tippen. " << std::endl <<
                               "Dieses wird daraufhin aufgedeckt und markiert (Markierung: x), "
                               "falls sich ein Teil eines Schiffes darunter befindet. " << std::endl <<
                               "Auf jedes Feld kann nur einmal getippt werden. Wenn alle Positionen, "

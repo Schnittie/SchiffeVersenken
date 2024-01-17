@@ -26,7 +26,8 @@ int main() {
         std::cout << std::endl << "HAPUTMENUE:" << std::endl;
         std::cout << std::endl << "Ihre Optionen:" << std::endl <<
             "  (0) Anweisungen und Regeln       (1) neues Spiel starten" << std::endl <<
-            "  (2) gespeichertes Spiel laden    (3) beenden" << std::endl;
+            "  (2) gespeichertes Spiel laden    (3) Spielstand loeschen" << std::endl <<
+            "  (4) beenden" << std::endl;
         std::string input;
         do {
             input.clear();
@@ -60,12 +61,16 @@ int main() {
         } else if(input == "2") {
             GameState gameState = Persistance::loadGame();
             if (gameState.playerBoard != nullptr && gameState.opponentBoard != nullptr) {
+                gameState.playerBoard->allShipsAlreadySet();
+                gameState.opponentBoard->allShipsAlreadySet();
                 GameLoop::startGame(std::move(gameState.playerBoard), std::move(gameState.opponentBoard), gameState.opponentLevel);
             } else {
                 std::cout << std::endl << "Spielstand konnte nicht geladen werden" << std::endl;
             }
         } else if(input == "3") {
-            quit = true;
+            Persistance::deleteSave();
+        } else if(input == "4") {
+        quit = true;
         } else {
             std::cout << "Ungueltige Eingabe" << std::endl;
         }
