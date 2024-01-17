@@ -6,6 +6,7 @@
 #include <thread>
 #include "GameLoop.h"
 #include "Opponent.h"
+#include "Persistance.h"
 
 void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Board> opponentBoard, int difficulty) {
     if (opponentBoard->shipsLeftToSet.find(2)->second + opponentBoard->shipsLeftToSet.find(3)->second +
@@ -16,9 +17,10 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
     std::cout << std::endl << std::endl << "Ihr Feld:";
     playerBoard->printShipField();
     std::vector<std::string> inputsVector;
+    bool quitGame = false;
     int sizeOfBiggestBoatLeftToSet;
     while (playerBoard->shipsLeftToSet.find(2)->second + playerBoard->shipsLeftToSet.find(3)->second +
-        playerBoard->shipsLeftToSet.find(4)->second + playerBoard->shipsLeftToSet.find(5)->second > 0) {
+        playerBoard->shipsLeftToSet.find(4)->second + playerBoard->shipsLeftToSet.find(5)->second > 0 && !quitGame) {
 //        playerBoard = requestShipSet(std::move(playerBoard));
         sizeOfBiggestBoatLeftToSet = requestNewShipField(std::move(playerBoard->createCopy()));
         do {
@@ -27,13 +29,15 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
         if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '0') {
             printInstructions();
         } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '1') {
-            // TODO
+            quitGame = true;
         } else {
             playerBoard = requestShipSet(std::move(playerBoard), inputsVector, sizeOfBiggestBoatLeftToSet);
         }
     }
-    std::cout << std::endl << "Nun geht es ans Felder aufdecken!" << std::endl;
-    while (playerBoard->totalShipsNotSunk > 0 && opponentBoard->totalShipsNotSunk > 0) {
+    if (!quitGame) {
+        std::cout << std::endl << "Nun geht es ans Felder aufdecken!" << std::endl;
+    }
+    while (playerBoard->totalShipsNotSunk > 0 && opponentBoard->totalShipsNotSunk > 0 && !quitGame) {
         int numberOfGuessesBefore;
         do {
             numberOfGuessesBefore = opponentBoard->guessCounter;
@@ -47,14 +51,15 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
                 std::cout << "Das ist die Platzierung Ihrer Schiffe:";
                 playerBoard->printShipField();
             } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '2') {
-                // TODO
+                quitGame = true;
             } else if (inputsVector.size() == 1 && inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) == '3') {
-                // TODO
+                Persistance::saveGame({(std::move(playerBoard->createCopy())),
+                                       std::move(opponentBoard->createCopy()), 7});
             } else {
                 opponentBoard = interpretGuess(std::move(opponentBoard), inputsVector);
             }
 //            opponentBoard = requestGuess(std::move(opponentBoard));
-        } while (opponentBoard->guessCounter == numberOfGuessesBefore);
+        } while (opponentBoard->guessCounter == numberOfGuessesBefore && !quitGame);
         std::this_thread::sleep_for(std::chrono::seconds(2));
         if (opponentBoard->totalShipsNotSunk > 0) {
             playerBoard = letOpponentGuess(std::move(playerBoard), difficulty);
@@ -193,31 +198,37 @@ std::vector<std::string> GameLoop::readCInIntoVector(){
 }
 
 void GameLoop::printInstructions() {
-    std::cout << std::endl << "Spielanweisungen: ";
+    std::cout << std::endl << "SPIELANWEISUNGEN: ";
     std::cout << std::endl << "Die Position von Feldern muss immer durch Eingabe des sie bezeichnenden Buchstaben "
-                              "und der Zahl durch ein Leerzeichen getrennt angegeben werden.";
+                              "und der Zahl durch ein Leerzeichen " << std::endl <<
+                              "getrennt angegeben werden.";
     std::cout << std::endl << "Beim Setzen von Schiffen wird das Ausgangsfeld des Schiffs und die Richtung, "
-                              "in die es gerichtet ist nacheinander erwartet. Das Ausgangsfeld wird wie im vorherigen "
-                              "Absatz beschrieben angegeben. Die Richtung wird als Anfangsbuchstaben der im "
-                              "Folgenden Auswahl an Richtungen erwartet: ";
+                              "in die es gerichtet ist nacheinander " << std::endl <<
+                              "erwartet. Das Ausgangsfeld wird wie im vorherigen "
+                              "Absatz beschrieben angegeben. Die Richtung wird als Anfangsbuchstaben" << std::endl <<
+                              "der folgenden Auswahl an Richtungen erwartet: ";
     std::cout << std::endl << "1.links(-> 'l') 2.rechts(-> 'r') 3.oben(-> 'o') 4.unten(-> 'u')";
-    std::cout << std::endl << "Beispiel: Wenn ein Schiff der Groesse 3 angegeben werden soll, als erste Eingabe '7 D' und"
-                              "als zweite Eingabe 'u' erfolgt, bedeutet das, dass sich das Schiff "
-                              "ueber die Felder 7-D, 7-E und 7-F erstreckt";
-    std::cout << std::endl << "Beim Tippen eines Feldes reicht lediglich die zuvor beschriebene Angabe eines Feldes.";
-    std::cout << std::endl << "Spielregeln:";
-    std::cout << std::endl << "Das Feld besteht anfangs nur aus Wasser (Markierung: ~)";
+    std::cout << std::endl << "Beispiel: Wenn ein Schiff der Groesse 3 angegeben werden soll, als erste Eingabe '7 D' und "
+                              "als zweite Eingabe 'u' " << std::endl <<
+                              "erfolgt, bedeutet das, dass sich das Schiff ueber die Felder 7-D, 7-E und 7-F erstreckt";
+    std::cout << std::endl << "Beim Tippen eines Feldes reicht lediglich die wie zuvor beschriebene Angabe eines Feldes.";
+    std::cout << std::endl << std::endl << "SPIELREGELN:";
+    std::cout << std::endl << "Das Feld besteht anfangs nur aus Wasser (Markierung: ~).";
     std::cout << std::endl << "Zunaechst muessen alle Schiffe gesetzt werden (das Programm fordert die jeweils zu setzende "
-                              "Anzahl an Schiffen in der jeweiligen Groesse an), diese duerfen nicht um die Ecke gehen, "
-                              "muessen komplett innerhalb des Spielfelds liegen und duerfen ein nebenliegendes Schiff nicht "
-                              "beruehren. (Die auf dem eigenen Feld gesetzten Schiffe werden mit dem Zeichen @ dargestellt.)"
-                              "Ist das erledigt, kann ab sofort nach jedem Spielzug gespeichert werden.";
-    std::cout << std::endl << "Dann darf der Spieler anfangen auf eine Position des Feldes, auf dem der Gegner seine"
-                              "Boote platziert hat, zu tippen. Dieses wird daraufhin aufgedeckt und markiert (Markierung: x), "
-                              "falls sich ein Teil eines Schiffes darunter befindet. Auf jedes Feld kann nur einmal "
-                              "getippt werden. Wenn alle Positionen, an denen sich das Schiff befindet dadurch markiert sind, "
-                              "ist dieses versenkt (Markierung: #). Wer zuerst alle Schiffe des Gegners versenkt hat, "
-                              "gewinnt das Spiel!" << std::endl << std::endl;
+                              "Anzahl an Schiffen in der " << std::endl <<
+                              "jeweiligen Groesse an), diese duerfen nicht um die Ecke gehen, "
+                              "muessen komplett innerhalb des Spielfelds liegen und " << std::endl <<
+                              "duerfen ein nebenliegendes Schiff nicht "
+                              "beruehren. (Die auf dem eigenen Feld gesetzten Schiffe werden mit dem Zeichen @" << std::endl <<
+                              "dargestellt.) Ist das erledigt, kann ab sofort nach jedem Spielzug gespeichert werden.";
+    std::cout << std::endl << "Dann darf der Spieler anfangen auf eine Position des Feldes, auf dem der Gegner seine "
+                              "Boote platziert hat, zu tippen. " << std::endl <<
+                              "Dieses wird daraufhin aufgedeckt und markiert (Markierung: x), "
+                              "falls sich ein Teil eines Schiffes darunter befindet. " << std::endl <<
+                              "Auf jedes Feld kann nur einmal getippt werden. Wenn alle Positionen, "
+                              "an denen sich das Schiff befindet dadurch " << std::endl <<
+                              "markiert sind, ist dieses versenkt (Markierung: #). Wer zuerst alle Schiffe des "
+                              "Gegners versenkt hat, gewinnt das Spiel!" << std::endl << std::endl;
 }
 
 void GameLoop::invalidInput() {
