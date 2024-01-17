@@ -12,6 +12,7 @@ int HelpFunctions::stringToInt(const std::string& input) {
         returnInt = returnInt*10 + (static_cast<int>(c) - 48);
     }
     return returnInt;
+    // interpretiert einen String als Int: verwendet den Ascii-Code des Strings und leitet davon ab, welcher int es ist
 }
 
 std::vector<std::string> HelpFunctions::readCInIntoVector(){
@@ -31,6 +32,7 @@ std::vector<std::string> HelpFunctions::readCInIntoVector(){
         inputs.push_back(singleInput);
     }
     return inputs;
+    // liest die Eingabe in einen Vektor, trennt dabei die Eingabe an den Leerzeichen
 }
 
 bool HelpFunctions::valuesOfShipsLeftToSetAreZero(std::unique_ptr<Board> board) {
