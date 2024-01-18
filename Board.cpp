@@ -90,7 +90,7 @@ bool Board::addShip(int shipSize, Coordinates coordinates,
 }
 
 GuessStatus Board::makeGuess(Coordinates coordinates) {
-    if (!GameRule::insideBoard(coordinates, size) ||
+    if (!GameRule::insideField(coordinates, size) ||
             guessFieldValue(coordinates) != GuessStatus::notGuessed) {
         // das angegebene Feld ist entweder außerhalb des Boards oder wurde schon guessed
         return GuessStatus::guessImpossible;
@@ -104,10 +104,10 @@ GuessStatus Board::makeGuess(Coordinates coordinates) {
         // wird das angegebene Feld aufgedeckt, wird dadurch ein Schiff komplett zerstört
         guessField.at(coordinates.x).at(coordinates.y) = GuessStatus::sunkShip;
         Coordinates appliedDirectionCoordinates = coordinates;
-        for (Direction dir: Coordinates::getListOfAllDirections()) {
+        for (Direction &dir: Coordinates::getListOfAllDirections()) {
             appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, dir);
             //gehe die in alle 4 Richtungen angrenzenden Felder durch
-            if (GameRule::insideBoard(appliedDirectionCoordinates, size)
+            if (GameRule::insideField(appliedDirectionCoordinates, size)
                 && shipFieldValue(appliedDirectionCoordinates)) {
                 setShipInThisDirectionSunk(coordinates, dir);
                 // wenn sich im aktuell behandelten (angrenzenden) Feld ein Teil des Schiffs befindet,
@@ -134,7 +134,7 @@ int Board::setShipInThisDirectionSunk(Coordinates coordinates, Direction directi
     while (true) {
         coordinates = Coordinates::applyDirectionChange(coordinates, direction);
         // nächstes Feld in die angegebene Richtung wird gewählt
-        if (!GameRule::insideBoard(coordinates, size) || guessFieldValue(coordinates) != GuessStatus::guessedRight) {
+        if (!GameRule::insideField(coordinates, size) || guessFieldValue(coordinates) != GuessStatus::guessedRight) {
             return shipFieldsFound;
             // befindet sich das behandelte Feld außerhalb des Boards oder befindet sich darauf kein Schiff, wird abgebrochen
         }
@@ -229,7 +229,7 @@ std::unique_ptr<Board> Board::createCopy() {
         }
     }
     // übertrage die Werte von guessField und shipField
-    for (auto shipSizePair: this->shipsLeftToSet) {
+    for (auto &shipSizePair: this->shipsLeftToSet) {
         if (boardCopy->shipsLeftToSet.find(shipSizePair.first) != boardCopy->shipsLeftToSet.end()) {
             boardCopy->shipsLeftToSet.find(shipSizePair.first)->second = shipSizePair.second;
             // wenn bereits ein Wert für die Größe in shipsLeftToSet vorhanden ist, dann überschreiben

@@ -1,10 +1,6 @@
 #include <iostream>
-#include "Board.h"
-#include "Opponent.h"
 #include "Persistance.h"
 #include "GameLoop.h"
-#include "HelpFunctions.h"
-#include <memory>
 
 int main() {
     std::cout << "    ____  ___  ______________    ___________ __  __________ \n"

@@ -117,7 +117,7 @@ std::string Persistance::chooseFile(){
     //we show the user all found save files
     std::cout  << "0. Cancel"  << std::endl;
     int numberOfSave = 1;
-    for (std::string filename: filenames) {
+    for (std::string &filename: filenames) {
         std::cout << numberOfSave << ". " << filename << std::endl;
         numberOfSave++;
     }

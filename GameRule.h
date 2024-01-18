@@ -18,7 +18,7 @@ public:
     static bool shipAddCorrect(int, Coordinates, Direction, std::unique_ptr<Board>);
 
     static bool shipDestroyed(Coordinates, std::unique_ptr<Board>);
-    static bool insideBoard(Coordinates, int);
+    static bool insideField(Coordinates, int);
     static int getNumberOfShipsOfThisSizeWhenThisBoardSize(int, int);
 private:
     static bool shipInThisDirectionUncovered(Coordinates coordinates, std::unique_ptr<Board> board, Direction direction);

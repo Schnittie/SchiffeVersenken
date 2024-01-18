@@ -187,7 +187,7 @@ std::unique_ptr<Board> GameLoop::tryToRequestAllShipsSet(std::unique_ptr<Board> 
             // wenn dieses Zeichen nichts davon ist, dann ist dies eine invalide Eingabe
         } else {
             Coordinates coordinates = turnStringVectorIntoCoordinates(inputsVector);
-            if (inputsVector.size() != 2 || !GameRule::insideBoard(coordinates, board->size)) {
+            if (inputsVector.size() != 2 || !GameRule::insideField(coordinates, board->size)) {
                 inputsVector.clear();
                 // wenn die Anzahl der Inputs nicht 2 ist oder die Koordinaten, die auf Basis des Inputs generiert wurden
                 // nicht im Feld liegen, dann ist dies eine invalide Eingabe
@@ -246,7 +246,7 @@ void GameLoop::requestNewGuess(std::unique_ptr<Board> opponentBoard) {
 std::unique_ptr<Board> GameLoop::interpretGuess(std::unique_ptr<Board> opponentBoard, const std::vector<std::string>& inputsVector) {
     // der inputs vector enthält die einzelnen Eingaben des Spielers an den Leerzeichen getrennt
     Coordinates coordinates = turnStringVectorIntoCoordinates(inputsVector);
-    if (inputsVector.size() != 2 || !GameRule::insideBoard(coordinates, opponentBoard->size)) {
+    if (inputsVector.size() != 2 || !GameRule::insideField(coordinates, opponentBoard->size)) {
         invalidInput();
         return std::move(opponentBoard);
         // wenn entweder nicht genau zwei Zeichenketten eingegeben wurden oder sich die Koordinaten, die auf Basis der
@@ -339,7 +339,7 @@ Coordinates GameLoop::turnStringVectorIntoCoordinates(std::vector<std::string> i
     int yPos;
     if (inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) >= 65) {
         yPos = static_cast<int>(inputsVector.at(0).at(0)) - 65;
-        for (char digit: inputsVector.at(1)) {
+        for (char &digit: inputsVector.at(1)) {
             xPos = xPos * 10 + (static_cast<int>(digit) - 48);
         }
         xPos--;
