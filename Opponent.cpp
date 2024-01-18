@@ -182,6 +182,9 @@ void Opponent::printGuessResult(const GuessStatus &guessResult) {
         case GuessStatus::guessedWrong:
             std::cout << std::endl << "The enemy missed!" << std::endl;
             break;
+        default:
+            std::cout << std::endl << "Error!" << std::endl;
+            return;
     }
 //    return std::move(board);
     // guessed ein zufälliges Feld der gegebenen Liste der noch verdeckten Felder, biss die Liste komplett leer ist

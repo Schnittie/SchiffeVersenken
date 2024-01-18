@@ -253,8 +253,9 @@ int Persistance::getIntFromGuessStatus(GuessStatus guessStatus) {
             return 3;
         case GuessStatus::sunkShip:
             return 4;
+        default:
+            return 5;
     }
-    return 5;
 }
 
 GuessStatus Persistance::getGuessStatusFromChar(char i) {
