@@ -24,9 +24,9 @@ public:
 
     static GameState loadGame();
 
-    static GameState emptyGame();
     static void deleteSave();
 private:
+    static GameState emptyGame();
     static void saveString(const std::string &, const std::string &);
 
     static std::string turnBoardIntoString(std::unique_ptr<Board>);
