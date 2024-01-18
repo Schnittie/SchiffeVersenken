@@ -16,7 +16,7 @@ std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board>
                                   GetRandomNumberBetween(0, board->size - 1));
         // wählt zufällige Koordinaten
         std::vector<Direction> allDirections = Coordinates::getListOfAllDirections();
-        direction = allDirections.at(GetRandomNumberBetween(0, allDirections.size()-1));
+        direction = allDirections.at(GetRandomNumberBetween(0, allDirections.size() - 1));
         // wählt zufällige Richtung
         maxRepetitionsCounter++;
         if (maxRepetitionsCounter == 10000) {
@@ -26,8 +26,8 @@ std::unique_ptr<Board> Opponent::addRandomShipOfGivenSize(std::unique_ptr<Board>
             // durch Änderung der Variable possibleToSetAllShips im Board auf false
         }
     } while (!board->addShip(shipSize, coordinates, direction) &&
-        board->shipsLeftToSet.find(shipSize) != board->shipsLeftToSet.end() &&
-        board->shipsLeftToSet.find(shipSize)->second > 0 && maxRepetitionsCounter < 10000);
+             board->shipsLeftToSet.find(shipSize) != board->shipsLeftToSet.end() &&
+             board->shipsLeftToSet.find(shipSize)->second > 0 && maxRepetitionsCounter < 10000);
     // probiert so lange aus ein Schiff der gegebenen Länge an einer zufälligen Koordinate
     // gerichtet in eine zufällige Richtung zu setzen, bis es klappt
     return std::move(board);
@@ -54,7 +54,8 @@ std::unique_ptr<Board> Opponent::placeAllShips(std::unique_ptr<Board> board) {
     return std::move(board);
 }
 
-std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board, int difficulty) { // hier hab ich nur xPos yPos durch Coords getauscht aber sonst kein refactoring betrieben, weil wir uns diese Methode glaube ich sowieso nochmal anschauen müssen
+std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board,
+                                           int difficulty) { // hier hab ich nur xPos yPos durch Coords getauscht aber sonst kein refactoring betrieben, weil wir uns diese Methode glaube ich sowieso nochmal anschauen müssen
     // "Schwierigkeitsscore" (0-10)
     // → legt fest mit welcher Wahrscheinlichkeit die Entscheidungen des computergesteuerten Gegners taktisch gefällt werden
     int makeCalculatedGuessNumber = GetRandomNumberBetween(0, 10) + difficulty;
@@ -69,55 +70,61 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board, int dif
                 unGuessedFields.emplace_back(xPos, yPos);
                 // füge alle Felder, auf die noch nicht guessed wurde in den Vektor unGuessedFields hinzu
             }
-            if (board->guessField.at(xPos).at(yPos) == GuessStatus::guessedRight) {
-                // Schiff wurde getroffen, aber noch nicht zerstört
-                Coordinates coordinates = Coordinates(xPos,yPos);
-                int alreadyDiscoveredFieldsOfShip = getNumberOfDiscoveredFieldsOfShip(std::move(board->createCopy()), coordinates);
-                // erstelle ein Koordinatenobjekt vom Feld und schaue, wie viele Felder vom Schiff, das sich auf dem
-                // aktuellen Feld befindet, schon getroffen wurden
-                Coordinates appliedDirectionCoordinates = coordinates;
-                for (Direction &direction: Coordinates::getListOfAllDirections()) {
-                    appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, direction);
-                    // gehe alle anliegenden Felder durch
-                    if (GameRule::insideField(appliedDirectionCoordinates, board->size) &&
-                            board->guessFieldValue(appliedDirectionCoordinates) == GuessStatus::notGuessed) {
-                        Coordinates coordinatesInOppositeDirection =
-                                Coordinates::applyDirectionChange(coordinates, Coordinates::getOppositeDirection(direction));
-                        Coordinates coordinatesTwoTimesInDirection =
-                                Coordinates::applyDirectionChange(appliedDirectionCoordinates, direction);
-                        // wenn das aktuell behandelte Feld (appliedDirectionCoordinates) innerhalb des Boards liegt,
-                        // dann hole dir das Feld 1 weiter in die Richtung und das in die entgegengesetzte Richtung
-                        // vom Ursprungsfeld aus
-                        if (alreadyDiscoveredFieldsOfShip >= 2 &&
-                            GameRule::insideField(coordinatesInOppositeDirection, board->size) &&
-                                board->guessFieldValue(coordinatesInOppositeDirection) == GuessStatus::guessedRight) {
-                            // wenn das Feld in der entgegengesetzten Richtung zum Ursprungsfeld auch ein Treffer war,
-                            // dann liegt das aktuell behandelte Feld in einer Linie mit den bereits aufgedeckten Feldern
-                            // des Schiffs, zu denen auch das Ursprungsfeld gehört
-                            if (alreadyDiscoveredFieldsOfShip <= 3 &&
-                                GameRule::insideField(coordinatesTwoTimesInDirection, board->size) &&
-                                    board->guessFieldValue(coordinatesTwoTimesInDirection) == GuessStatus::guessedRight) {
-                                betweenShips.push_back(appliedDirectionCoordinates);
-                                // wenn der bereits getroffene Teil des Schiffs maximal 3 Felder groß ist und das Feld
-                                // eins weiter in die ursprüngliche Richtung auch ein Treffer war, dann kann es sein,
-                                // dass das Feld dazwischen zwei Schiffe verbindet (3 Felder + behandeltes Feld
-                                // + getroffenes Feld 1 weiter = 5 Felder → maximale Größe)
-                            } else {
-                                couldBeShip.push_back(appliedDirectionCoordinates);
-                                // ansonsten könnte das Feld trotzdem zum Schiff gehören
-                            }
-                        } else if (alreadyDiscoveredFieldsOfShip == 1) {
-                            if (GameRule::insideField(coordinatesTwoTimesInDirection, board->size) &&
-                                    board->guessFieldValue(coordinatesTwoTimesInDirection) == GuessStatus::guessedRight) {
-                                betweenShips.push_back(appliedDirectionCoordinates);
-                                // wenn das Feld eins weiter in die Richtung auch ein Treffer war, dann liegt das aktuell
-                                // behandelte Feld zwischen zwei Schiffen/Schiffsteilen
-                            } else {
-                                couldBeShip.push_back(appliedDirectionCoordinates);
-                                // wenn das nicht der Fall ist, könnte es sich trotzdem um ein Schiffsfeld handel, da
-                                // ja kein anderes Schiff angrenzt
-                            }
-                        }
+            if (board->guessField.at(xPos).at(yPos) != GuessStatus::guessedRight) {
+                continue;
+            }
+            // Schiff wurde getroffen, aber noch nicht zerstört
+            Coordinates coordinates = Coordinates(xPos, yPos);
+            int alreadyDiscoveredFieldsOfShip = getNumberOfDiscoveredFieldsOfShip(std::move(board->createCopy()),
+                                                                                  coordinates);
+            // erstelle ein Koordinatenobjekt vom Feld und schaue, wie viele Felder vom Schiff, das sich auf dem
+            // aktuellen Feld befindet, schon getroffen wurden
+            Coordinates appliedDirectionCoordinates = coordinates;
+            for (Direction &direction: Coordinates::getListOfAllDirections()) {
+                appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, direction);
+                // gehe alle anliegenden Felder durch
+                if (!GameRule::insideField(appliedDirectionCoordinates, board->size) ||
+                    board->guessFieldValue(appliedDirectionCoordinates) != GuessStatus::notGuessed) {
+                    continue;
+                }
+
+
+                Coordinates coordinatesInOppositeDirection =
+                        Coordinates::applyDirectionChange(coordinates,
+                                                          Coordinates::getOppositeDirection(direction));
+                Coordinates coordinatesTwoTimesInDirection =
+                        Coordinates::applyDirectionChange(appliedDirectionCoordinates, direction);
+                // wenn das aktuell behandelte Feld (appliedDirectionCoordinates) innerhalb des Boards liegt,
+                // dann hole dir das Feld 1 weiter in die Richtung und das in die entgegengesetzte Richtung
+                // vom Ursprungsfeld aus
+                if (alreadyDiscoveredFieldsOfShip >= 2 &&
+                    GameRule::insideField(coordinatesInOppositeDirection, board->size) &&
+                    board->guessFieldValue(coordinatesInOppositeDirection) == GuessStatus::guessedRight) {
+                    // wenn das Feld in der entgegengesetzten Richtung zum Ursprungsfeld auch ein Treffer war,
+                    // dann liegt das aktuell behandelte Feld in einer Linie mit den bereits aufgedeckten Feldern
+                    // des Schiffs, zu denen auch das Ursprungsfeld gehört
+                    if (alreadyDiscoveredFieldsOfShip <= 3 &&
+                        GameRule::insideField(coordinatesTwoTimesInDirection, board->size) &&
+                        board->guessFieldValue(coordinatesTwoTimesInDirection) == GuessStatus::guessedRight) {
+                        betweenShips.push_back(appliedDirectionCoordinates);
+                        // wenn der bereits getroffene Teil des Schiffs maximal 3 Felder groß ist und das Feld
+                        // eins weiter in die ursprüngliche Richtung auch ein Treffer war, dann kann es sein,
+                        // dass das Feld dazwischen zwei Schiffe verbindet (3 Felder + behandeltes Feld
+                        // + getroffenes Feld 1 weiter = 5 Felder → maximale Größe)
+                    } else {
+                        couldBeShip.push_back(appliedDirectionCoordinates);
+                        // ansonsten könnte das Feld trotzdem zum Schiff gehören
+                    }
+                } else if (alreadyDiscoveredFieldsOfShip == 1) {
+                    if (GameRule::insideField(coordinatesTwoTimesInDirection, board->size) &&
+                        board->guessFieldValue(coordinatesTwoTimesInDirection) == GuessStatus::guessedRight) {
+                        betweenShips.push_back(appliedDirectionCoordinates);
+                        // wenn das Feld eins weiter in die Richtung auch ein Treffer war, dann liegt das aktuell
+                        // behandelte Feld zwischen zwei Schiffen/Schiffsteilen
+                    } else {
+                        couldBeShip.push_back(appliedDirectionCoordinates);
+                        // wenn das nicht der Fall ist, könnte es sich trotzdem um ein Schiffsfeld handel, da
+                        // ja kein anderes Schiff angrenzt
                     }
                 }
             }
@@ -126,13 +133,13 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board, int dif
     if (makeCalculatedGuessNumber >= 10) {
         // führt nur aus, wenn der Zufallsgenerator und der Schwierigkeitsgrad es verursachen
         std::unique_ptr<Board> boardAfterGuess = Opponent::tryToHit(betweenShips,
-                                                                           std::move(board->createCopy()));
-        if (boardAfterGuess != nullptr){
+                                                                    std::move(board->createCopy()));
+        if (boardAfterGuess != nullptr) {
             return boardAfterGuess;
         }
         boardAfterGuess = Opponent::tryToHit(couldBeShip,
                                              std::move(board->createCopy()));
-        if (boardAfterGuess != nullptr){
+        if (boardAfterGuess != nullptr) {
             return boardAfterGuess;
         }
         return guessRandom(std::move(board), unGuessedFields);
@@ -149,7 +156,7 @@ std::unique_ptr<Board> Opponent::makeGuess(std::unique_ptr<Board> board, int dif
 
 std::unique_ptr<Board> Opponent::tryToHit(std::vector<Coordinates> coordinatesVector, std::unique_ptr<Board> board) {
     int randomFreeField;
-    Coordinates coordinates = Coordinates(0,0);
+    Coordinates coordinates = Coordinates(0, 0);
     while (!coordinatesVector.empty()) {
         randomFreeField = GetRandomNumberBetween(0, coordinatesVector.size() - 1);
         coordinates = coordinatesVector.at(randomFreeField);
@@ -193,15 +200,16 @@ void Opponent::printGuessResult(const GuessStatus &guessResult) {
 int Opponent::getNumberOfDiscoveredFieldsOfShip(std::unique_ptr<Board> board, Coordinates coordinates) {
     if (GameRule::insideField(coordinates, board->size) &&
         (board->guessFieldValue(coordinates) == GuessStatus::guessedRight ||
-        board->guessFieldValue(coordinates) == GuessStatus::sunkShip)) {
+         board->guessFieldValue(coordinates) == GuessStatus::sunkShip)) {
         Coordinates appliedDirectionCoordinates = coordinates;
         int numberOfFields = 1;
         for (Direction &direction: Coordinates::getListOfAllDirections()) {
             appliedDirectionCoordinates = Coordinates::applyDirectionChange(coordinates, direction);
             if (GameRule::insideField(appliedDirectionCoordinates, board->size) &&
                 (board->guessFieldValue(appliedDirectionCoordinates) == GuessStatus::guessedRight
-                || board->guessFieldValue(appliedDirectionCoordinates) == GuessStatus::sunkShip)) {
-                numberOfFields += getNumberOfDiscoveredFieldsOfShipInThisDirection(std::move(board->createCopy()), coordinates, direction);
+                 || board->guessFieldValue(appliedDirectionCoordinates) == GuessStatus::sunkShip)) {
+                numberOfFields += getNumberOfDiscoveredFieldsOfShipInThisDirection(std::move(board->createCopy()),
+                                                                                   coordinates, direction);
             }
         }
         return numberOfFields;
@@ -213,12 +221,13 @@ int Opponent::getNumberOfDiscoveredFieldsOfShip(std::unique_ptr<Board> board, Co
     // ausgeführt und ihr Rückgabewert den anderen Ausführungen und dem Ausgangsfeld zusammengezählt → Größe des Schiffs
 }
 
-int Opponent::getNumberOfDiscoveredFieldsOfShipInThisDirection(std::unique_ptr<Board> board, Coordinates coordinates, Direction direction) {
+int Opponent::getNumberOfDiscoveredFieldsOfShipInThisDirection(std::unique_ptr<Board> board, Coordinates coordinates,
+                                                               Direction direction) {
     int numberOfFields = 0;
     coordinates = Coordinates::applyDirectionChange(coordinates, direction);
-    while(GameRule::insideField(coordinates, board->size) &&
-        (board->guessFieldValue(coordinates) == GuessStatus::guessedRight ||
-        board->guessFieldValue(coordinates) == GuessStatus::sunkShip)) {
+    while (GameRule::insideField(coordinates, board->size) &&
+           (board->guessFieldValue(coordinates) == GuessStatus::guessedRight ||
+            board->guessFieldValue(coordinates) == GuessStatus::sunkShip)) {
         numberOfFields++;
         coordinates = Coordinates::applyDirectionChange(coordinates, direction);
     }
