@@ -117,9 +117,9 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
             // ansonsten versuche die Eingabe als Rate-Versuch zu interpretieren
         } while (opponentBoard->guessCounter == numberOfGuessesBefore && !quitRound);
         // wiederhole so lange, bis ein Rate-Versuch des Spielers gültig war oder der Spieler das Spiel verlassen möchte
-        std::this_thread::sleep_for(std::chrono::seconds(3));
         // halte den Thread kurz an, damit der Spieler erkennen kann, ob sein Rate-Versuch erfolgreich war
         if (opponentBoard->totalShipsNotSunk > 0 && !quitRound) {
+            std::this_thread::sleep_for(std::chrono::seconds(3));
             playerBoard = letOpponentGuess(std::move(playerBoard), difficulty);
             playerBoard->guessCounter++;
         }
@@ -187,7 +187,7 @@ std::unique_ptr<Board> GameLoop::tryToRequestAllShipsSet(std::unique_ptr<Board> 
             // wenn dieses Zeichen nichts davon ist, dann ist dies eine invalide Eingabe
         } else {
             Coordinates coordinates = turnStringVectorIntoCoordinates(inputsVector);
-            if (inputsVector.size() != 2 || !GameRule::insideField(coordinates, board->size)) {
+            if (inputsVector.size() != 2 || !GameRule::insideBoard(coordinates, board->size)) {
                 inputsVector.clear();
                 // wenn die Anzahl der Inputs nicht 2 ist oder die Koordinaten, die auf Basis des Inputs generiert wurden
                 // nicht im Feld liegen, dann ist dies eine invalide Eingabe
@@ -246,7 +246,7 @@ void GameLoop::requestNewGuess(std::unique_ptr<Board> opponentBoard) {
 std::unique_ptr<Board> GameLoop::interpretGuess(std::unique_ptr<Board> opponentBoard, const std::vector<std::string>& inputsVector) {
     // der inputs vector enthält die einzelnen Eingaben des Spielers an den Leerzeichen getrennt
     Coordinates coordinates = turnStringVectorIntoCoordinates(inputsVector);
-    if (inputsVector.size() != 2 || !GameRule::insideField(coordinates, opponentBoard->size)) {
+    if (inputsVector.size() != 2 || !GameRule::insideBoard(coordinates, opponentBoard->size)) {
         invalidInput();
         return std::move(opponentBoard);
         // wenn entweder nicht genau zwei Zeichenketten eingegeben wurden oder sich die Koordinaten, die auf Basis der
