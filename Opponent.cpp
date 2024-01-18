@@ -183,7 +183,7 @@ void Opponent::printGuessResult(const GuessStatus &guessResult) {
             std::cout << std::endl << "The enemy missed!" << std::endl;
             break;
     }
-    return std::move(board);
+//    return std::move(board);
     // guessed ein zufälliges Feld der gegebenen Liste der noch verdeckten Felder, biss die Liste komplett leer ist
 }
 
