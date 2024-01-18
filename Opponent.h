@@ -10,7 +10,6 @@
 #include "Board.h"
 #include "Coordinates.h"
 
-class Coordinates;
 class Opponent {
 public:
     // fügt ein neues Schiff in das Board ein und gibt das Board zurück

@@ -36,6 +36,7 @@ public:
     std::vector<std::vector<GuessStatus>> guessField;
 
     explicit Board(int);
+    ~Board();
 
     void reset();
 

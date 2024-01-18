@@ -251,3 +251,9 @@ void Board::allShipsAlreadySet() {
     }
 }
 
+Board::~Board() {
+    shipsLeftToSet.clear();
+    shipField.clear();
+    guessField.clear();
+}
+
