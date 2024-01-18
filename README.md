@@ -3,7 +3,7 @@ This is a project due for our C++ Lecture, an implementation of the game Battles
 
 To compile the project using c++ you will need to execute the following command:
 g++ -std=c++17 -o SchiffeVersenken_Projekt_ Battleship.cpp Board.cpp Opponent.cpp Persistance.cpp GameLoop.cpp GameRule.cpp Coordinates.cpp HelpFunctions.cpp
-
+Please make sure to use an up-to-date version of g++ ^_^
 
 Informations about the Architecture of this project can be found in file BattleshipsArchitecture.pdf (in same folder as this file) or by following this link:
 
