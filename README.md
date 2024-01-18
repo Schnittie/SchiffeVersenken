@@ -1,5 +1,5 @@
 # SchiffeVersenken
-There is a project due for our C++ Lecture, an implementation of the game Battleship against a cpu opponent
+This is a project due for our C++ Lecture, an implementation of the game Battleship against a cpu opponent
 
 To compile the project you will need to execute the following command:
 gpp...
