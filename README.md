@@ -1,8 +1,9 @@
 # SchiffeVersenken
 This is a project due for our C++ Lecture, an implementation of the game Battleship against a cpu opponent
 
-To compile the project you will need to execute the following command:
-gpp...
+To compile the project using c++ you will need to execute the following command:
+g++ -std=c++17 -o SchiffeVersenken_Projekt_ Battleship.cpp Board.cpp Opponent.cpp Persistance.cpp GameLoop.cpp GameRule.cpp Coordinates.cpp HelpFunctions.cpp
+
 
 Informations about the Architecture of this project can be found in file BattleshipsArchitecture.pdf (in same folder as this file) or by following this link:
 
