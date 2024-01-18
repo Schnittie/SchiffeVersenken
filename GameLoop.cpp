@@ -14,7 +14,7 @@
 void GameLoop::printMainMenu() {
     std::cout << std::endl << "MAIN MENU:" << std::endl;
     std::cout << std::endl << "Your options:" << std::endl <<
-              "  (0) Tutorial and rules       (1) Start new game" << std::endl <<
+              "  (0) Instructions and rules       (1) Start new game" << std::endl <<
               "  (2) Load saved game          (3) Delete saved game" << std::endl <<
               "  (4) Exit" << std::endl;
 }
@@ -143,7 +143,7 @@ void GameLoop::requestNewShipField(std::unique_ptr<Board> playerBoard) {
     std::cout << "Please place a ship of the size " <<
     getSizeOfBiggestShipLeftToSet(std::move(playerBoard->createCopy())) << ".";
     std::cout << std::endl << "Please separate your input by spaces!";
-    std::cout << std::endl << "( (0) Tutorial and rules    (1) Cancel game and return to main menu";
+    std::cout << std::endl << "( (0) Instructions and rules    (1) Cancel game and return to main menu";
     std::cout << std::endl << "  (2) place all other ships randomly )" << std::endl;
 }
 
@@ -225,7 +225,7 @@ std::unique_ptr<Board> GameLoop::requestShipDirectionAndTrySet(std::unique_ptr<B
         return std::move(playerBoard);
     } // wenn die Eingabe '0' ist, dann gebe die Anweisungen und Regeln aus und beende den Vorgang
     if (!playerBoard->addShip(sizeOfBiggestShipLeftToSet, coordinates, Coordinates::charIntoDirection(input.at(0)))) {
-        invalidInput();
+        std::cout << std::endl << "You cannot place a ship there" << std::endl;
         return std::move(playerBoard);
     } // wenn das Hinzufügen des Schiffes nicht erfolgreich war, dann war das ein invalide Eingabe
     playerBoard->printShipField();
@@ -239,7 +239,7 @@ void GameLoop::requestNewGuess(std::unique_ptr<Board> opponentBoard) {
     opponentBoard->printGuessField();
     std::cout << "You may guess a field.";
     std::cout << std::endl << "Please separate your input by spaces!";
-    std::cout << std::endl << "( (0) Tutorial and rules   (1) My shipfield";
+    std::cout << std::endl << "( (0) Instructions and rules   (1) My shipfield";
     std::cout << std::endl << "  (2) Cancel game and return to main menu   (3) Save game )" << std::endl;
 }
 
@@ -289,37 +289,34 @@ std::unique_ptr<Board> GameLoop::letOpponentGuess(std::unique_ptr<Board> playerB
 }
 
 void GameLoop::printInstructions() {
-    std::cout << std::endl << "SPIELANWEISUNGEN: ";
-    std::cout << std::endl << "Die Position von Feldern muss immer durch Eingabe des sie bezeichnenden Buchstaben "
-                              "und der Zahl durch ein Leerzeichen " << std::endl <<
-                              "getrennt angegeben werden.";
-    std::cout << std::endl << "Beim Setzen von Schiffen wird das Ausgangsfeld des Schiffs und die Richtung, "
-                              "in die es gerichtet ist nacheinander " << std::endl <<
-                              "erwartet. Das Ausgangsfeld wird wie im vorherigen "
-                              "Absatz beschrieben angegeben. Die Richtung wird als Anfangsbuchstaben" << std::endl <<
-                              "der folgenden Auswahl an Richtungen erwartet: ";
-    std::cout << std::endl << "1.links(-> 'l') 2.rechts(-> 'r') 3.oben(-> 'o') 4.unten(-> 'u')";
-    std::cout << std::endl << "Beispiel: Wenn ein Schiff der Groesse 3 angegeben werden soll, als erste Eingabe '7 D' und "
-                              "als zweite Eingabe 'u' " << std::endl <<
-                              "erfolgt, bedeutet das, dass sich das Schiff ueber die Felder 7-D, 7-E und 7-F erstreckt";
-    std::cout << std::endl << "Beim Tippen eines Feldes reicht lediglich die wie zuvor beschriebene Angabe eines Feldes.";
-    std::cout << std::endl << std::endl << "SPIELREGELN:";
-    std::cout << std::endl << "Das Feld besteht anfangs nur aus Wasser (Markierung: ~).";
-    std::cout << std::endl << "Zunaechst muessen alle Schiffe gesetzt werden (das Programm fordert die jeweils zu setzende "
-                              "Anzahl an Schiffen in der " << std::endl <<
-                              "jeweiligen Groesse an), diese duerfen nicht um die Ecke gehen, "
-                              "muessen komplett innerhalb des Spielfelds liegen und " << std::endl <<
-                              "duerfen ein nebenliegendes Schiff nicht "
-                              "beruehren. (Die auf dem eigenen Feld gesetzten Schiffe werden mit dem Zeichen @" << std::endl <<
-                              "dargestellt.) Ist das erledigt, kann ab sofort nach jedem Spielzug gespeichert werden.";
-    std::cout << std::endl << "Dann darf der Spieler anfangen auf eine Position des Feldes, auf dem der Gegner seine "
-                              "Schiffe platziert hat, zu tippen. " << std::endl <<
-                              "Dieses wird daraufhin aufgedeckt und markiert (Markierung: x), "
-                              "falls sich ein Teil eines Schiffes darunter befindet. " << std::endl <<
-                              "Auf jedes Feld kann nur einmal getippt werden. Wenn alle Positionen, "
-                              "an denen sich das Schiff befindet dadurch " << std::endl <<
-                              "markiert sind, ist dieses versenkt (Markierung: #). Wer zuerst alle Schiffe des "
-                              "Gegners versenkt hat, gewinnt das Spiel!" << std::endl << std::endl;
+    std::cout << std::endl << "INSTRUCTIONS: ";
+    std::cout << std::endl << "Inputting coordinates is done by writing the corresponding letter and number "
+                              "seperated by a space." << std::endl;
+    std::cout << std::endl << "When setting up your ships, first input the coordinates, "
+                              "then input the direction the ship should go along. " << std::endl <<
+                              "The direction is given by inputting the first letter." << std::endl;
+    std::cout << std::endl << "1.left(-> 'l') 2.right(-> 'r') 3.up(-> 'u') 4.down(-> 'd')";
+    std::cout << std::endl << "Example: When inputting a ship of size 3, first input the coordinates 'D 7' afterwards "
+                              "input the direction 'd'." << std::endl <<
+                              "This will place a ship which extends over the fields 'D 7' 'E 7' 'F 7'";
+    std::cout << std::endl << "When making a guess, inputting coordinates follows the same pattern.";
+    std::cout << std::endl << std::endl << "RULES:";
+    std::cout << std::endl << "The field starts out containing only water (Represented by: ~).";
+    std::cout << std::endl << "First all ships have to be placed (the game will tell you which size ship to place next. "<< std::endl <<
+                              "The number of ships is dependant on the size of the board) " << std::endl <<
+                              "The ships may not go around corners, "<< std::endl <<
+                              "have to be completely inside the field " << std::endl <<
+                              "and cannot be placed next to each other. "
+                              "(Your own placed ships are represented by an @.)" << std::endl <<
+                              "Once you have placed your ships, you can save your game before each turn.";
+    std::cout << std::endl << "Each of your turns beginns with you making a guess on your opponents field."<< std::endl <<
+                              "That field will then be revealed. If you managed to hit an enemy ship,"
+                              "the location will be marked with an x. " << std::endl <<
+                              "You can only ever guess each field once."<< std::endl <<
+                              "As soon as all coordinates "
+                              "of a ship are hit, it will sink and get the marking # " << std::endl <<
+                              "The player who first sinks all of their opponents ships wins. " << std::endl <<
+                              "Good luck!" << std::endl << std::endl;
 }
 
 void GameLoop::invalidInput() {
