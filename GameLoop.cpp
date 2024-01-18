@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <thread>
+#include <algorithm>
 #include "GameLoop.h"
 #include "Opponent.h"
 #include "Persistance.h"
@@ -203,14 +204,17 @@ std::unique_ptr<Board> GameLoop::tryToRequestAllShipsSet(std::unique_ptr<Board> 
 
 std::unique_ptr<Board> GameLoop::requestShipDirectionAndTrySet(std::unique_ptr<Board> playerBoard, Coordinates coordinates,
                                                                int sizeOfBiggestShipLeftToSet) {
-    std::cout << "Please input the direction the ship should be facing! ('o'^|'u'v|'l'<|'r'>)" << std::endl;
+    std::cout << "Please input the direction the ship should be facing! ('u'^|'d'v|'l'<|'r'>)" << std::endl;
     std::string input;
     do {
         std::cin >> input;
     } while (input.empty());
     // warte, bis der Spieler eine Eingabe gemacht und nicht nur eine neue Zeile angefangen hat
-    if (input.length() != 1 || !(input.at(0) == 'l' || input.at(0) == 'r' || input.at(0) == 'o'
-                            || input.at(0) == 'u' || input.at(0) == '0')) {
+    std::transform(input.begin(), input.end(), input.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
+    if (input.length() != 1 || !(input.at(0) == 'l' || input.at(0) == 'r' || input.at(0) == 'u'
+                            || input.at(0) == 'd' || input.at(0) == '0')) {
         invalidInput();
         return std::move(playerBoard);
     }
@@ -328,6 +332,9 @@ Coordinates GameLoop::turnStringVectorIntoCoordinates(std::vector<std::string> i
         return {-1, -1};
         // Es wird ein Vektor mit zwei Werten erwartet → alles andere ist eine ungültige Eingabe → Rückgabe ungültiger Koordinaten
     }
+    std::transform(inputsVector.at(0).begin(), inputsVector.at(0).end(), inputsVector.at(0).begin(), [](unsigned char c) {
+        return std::toupper(c);
+    });
     int xPos = 0;
     int yPos;
     if (inputsVector.at(0).size() == 1 && inputsVector.at(0).at(0) >= 65) {

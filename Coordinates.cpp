@@ -48,16 +48,16 @@ Direction Coordinates::getOppositeDirection(Direction direction) {
 
 Direction Coordinates::charIntoDirection(char c) {
     switch (c) {
-        case 'u':
+        case 'd':
             return Direction::down;
-        case 'o':
+        case 'u':
             return Direction::up;
         case 'l':
             return Direction::left;
         case 'r':
             return Direction::right;
         default:
-            std::cout << std::endl << "Dies ist eine ungueltige Eingabe!" << std::endl;
+            std::cout << std::endl << "Faulty input!" << std::endl;
             return Direction::down;
     }
 }
