@@ -30,6 +30,9 @@ private:
 //TODO: Idee wir könnten wenn wir fancy sein wollen auch mehrere Opponents machen mit verschiedenen schwierigkeitsgraden welche dann alle ein Interface erfüllen
 // Meine Überlegung (Fleischi): deutlich einfacher einen Score zu machen, der dann in platzieren Methoden einbezogen wird, als mehrere Klassen
 
+    static void printGuessResult(const GuessStatus &guessResult);
+
+    static std::unique_ptr<Board> tryToHit(std::vector<Coordinates> coordinatesVector, std::unique_ptr<Board> board);
 };
 
 
