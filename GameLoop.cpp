@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <thread>
 #include <algorithm>
 #include "GameLoop.h"
 #include "Opponent.h"
@@ -119,7 +118,6 @@ void GameLoop::startGame(std::unique_ptr<Board> playerBoard, std::unique_ptr<Boa
         // wiederhole so lange, bis ein Rate-Versuch des Spielers gültig war oder der Spieler das Spiel verlassen möchte
         // halte den Thread kurz an, damit der Spieler erkennen kann, ob sein Rate-Versuch erfolgreich war
         if (opponentBoard->totalShipsNotSunk > 0 && !quitRound) {
-            std::this_thread::sleep_for(std::chrono::seconds(3));
             playerBoard = letOpponentGuess(std::move(playerBoard), difficulty);
             playerBoard->guessCounter++;
         }

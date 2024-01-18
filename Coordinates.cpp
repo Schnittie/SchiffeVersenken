@@ -11,15 +11,15 @@ Coordinates::Coordinates(int xCoordinate, int yCoordinate) : x(xCoordinate), y(y
 Coordinates Coordinates::applyDirectionChange(Coordinates originalCoordinates, Direction direction) {
     switch (direction) {
         case Direction::down:
-            return Coordinates(originalCoordinates.x, originalCoordinates.y + 1);
+            return {originalCoordinates.x, originalCoordinates.y + 1};
         case Direction::up:
-            return Coordinates(originalCoordinates.x, originalCoordinates.y - 1);
+            return {originalCoordinates.x, originalCoordinates.y - 1};
         case Direction::left:
-            return Coordinates(originalCoordinates.x - 1, originalCoordinates.y);
+            return {originalCoordinates.x - 1, originalCoordinates.y};
         case Direction::right:
-            return Coordinates(originalCoordinates.x + 1, originalCoordinates.y);
+            return {originalCoordinates.x + 1, originalCoordinates.y};
         default:
-            return Coordinates(originalCoordinates.x, originalCoordinates.y + 1);
+            return {originalCoordinates.x, originalCoordinates.y + 1};
     }
 }
 

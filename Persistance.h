@@ -33,13 +33,13 @@ private:
 
     static int getIntFromGuessStatus(GuessStatus guessStatus);
     static void tryCreatingSaveDirectory();
-    static GameState getGameStateFromFile(std::string filename);
+    static GameState getGameStateFromFile(const std::string& filename);
 
     static GuessStatus getGuessStatusFromChar(char i);
 
     static std::unique_ptr<Board> getBoardFromStrings(std::string guessFieldString, std::string shipFieldString, int notSunk);
 
-    static std::string generateValidationString(std::string string);
+    static std::string generateValidationString(const std::string& string);
 
     static bool validateString(std::vector<std::string> vector1);
 

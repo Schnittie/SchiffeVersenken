@@ -169,7 +169,7 @@ GameState Persistance::loadGame() {
     return getGameStateFromFile(savePath);
 }
 
-GameState Persistance::getGameStateFromFile(std::string filename) {
+GameState Persistance::getGameStateFromFile(const std::string& filename) {
     std::ifstream inputFile(filename);
     if (!inputFile.is_open()) {
         std::cout << "Unable to open the file." << std::endl;
@@ -274,7 +274,7 @@ GuessStatus Persistance::getGuessStatusFromChar(char i) {
     }
 }
 
-std::string Persistance::generateValidationString(std::string string) {
+std::string Persistance::generateValidationString(const std::string& string) {
     //it's like hashing but simpler: we sum up all the chars in the file and add it to the bottom
     long sum = 0;
     for (char c: string) {
